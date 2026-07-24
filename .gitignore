@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Generated output
+examples/quickstart_out/
+*.log
+
+# OS
+.DS_Store
