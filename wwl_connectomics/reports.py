@@ -29,7 +29,7 @@ from . import atlas as atlas_mod
 from .crossval import lambda_sensitivity_curve
 from .kernels import build_K, calibrate_lam_fisher
 from .shifts import compute_region_shift_stats, region_shift_dataframe
-from .style import apply_style, get_palette
+from .style import apply_style, draw_violin, get_palette
 
 
 def _intra_inter(D, n_each):
@@ -86,19 +86,15 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
         mpatches.Patch(facecolor=P["BLUE"], label=f"Higher shift in {label_0}"),
     ], fontsize=8, loc="lower right", framealpha=0.85)
 
-    # B — per-RSN boxplot
+    # B — per-RSN violin
     ax = fig.add_subplot(gs[0, 1:])
     width = 0.35
     for xi, rsn_id in enumerate(range(n_rsn)):
         mask_r = rsn_ids == rsn_id
         d0 = shifts_0[:, mask_r].mean(axis=1)
         d1 = shifts_1[:, mask_r].mean(axis=1)
-        ax.boxplot(d0, positions=[xi - width / 2], widths=width * 0.9, patch_artist=True,
-                   boxprops=dict(facecolor=P["BLUE"], alpha=0.65), medianprops=dict(color=P["NAVY"], lw=2),
-                   whiskerprops=dict(color=P["BLUE"]), capprops=dict(color=P["BLUE"]), showfliers=False)
-        ax.boxplot(d1, positions=[xi + width / 2], widths=width * 0.9, patch_artist=True,
-                   boxprops=dict(facecolor=P["CORAL"], alpha=0.65), medianprops=dict(color="darkred", lw=2),
-                   whiskerprops=dict(color=P["CORAL"]), capprops=dict(color=P["CORAL"]), showfliers=False)
+        draw_violin(ax, d0, xi - width / 2, width * 0.9, P["BLUE"], P["NAVY"])
+        draw_violin(ax, d1, xi + width / 2, width * 0.9, P["CORAL"], "darkred")
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("Mean shift per RSN (subjects)")
     ax.set_title(f"B — Per-RSN shift distribution: {label_0} vs {label_1}", fontsize=10, color=P["NAVY"])
@@ -458,9 +454,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
         mask = rsn_ids == rsn_id
         for data, off, col, mc in [(shifts_0[:, mask].mean(axis=1), -width/2, P["BLUE"], P["NAVY"]),
                                     (shifts_1[:, mask].mean(axis=1), width/2, P["CORAL"], "darkred")]:
-            ax.boxplot(data, positions=[xi + off], widths=width * 0.9, patch_artist=True,
-                      boxprops=dict(facecolor=col, alpha=0.65), medianprops=dict(color=mc, lw=2),
-                      whiskerprops=dict(color=col), capprops=dict(color=col), showfliers=False)
+            draw_violin(ax, data, xi + off, width * 0.9, col, mc)
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=8.5)
     ax.set_ylabel("Mean shift per RSN (subjects)", fontsize=9)
     ax.set_title(f"H — Embedding shift per RSN\n({label_0} blue, {label_1} orange)", fontsize=10, color=P["NAVY"])

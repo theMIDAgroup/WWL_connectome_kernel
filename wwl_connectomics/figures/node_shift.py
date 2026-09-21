@@ -29,7 +29,7 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
 from .. import atlas as atlas_mod
-from ..style import apply_style, get_palette
+from ..style import apply_style, draw_violin, get_palette
 
 
 def _project_pca(emb, N):
@@ -275,7 +275,7 @@ def plot_top_regions_shift(delta, significant, region_names, save_path,
 
 def plot_shift_boxplot_by_network(shifts_0, shifts_1, rsn_ids, rsn_labels, save_path,
                                    label_0="group0", label_1="group1"):
-    """Per-subject, per-network mean shift, boxplot group0 vs group1 for each network."""
+    """Per-subject, per-network mean shift, violin group0 vs group1 for each network."""
     P = get_palette(); apply_style()
     n_rsn = len(rsn_labels)
     width = 0.35
@@ -284,12 +284,8 @@ def plot_shift_boxplot_by_network(shifts_0, shifts_1, rsn_ids, rsn_labels, save_
         mask_r = rsn_ids == rsn_id
         d0 = shifts_0[:, mask_r].mean(axis=1)
         d1 = shifts_1[:, mask_r].mean(axis=1)
-        ax.boxplot(d0, positions=[xi - width / 2], widths=width * 0.9, patch_artist=True,
-                   boxprops=dict(facecolor=P["BLUE"], alpha=0.65), medianprops=dict(color=P["NAVY"], lw=2),
-                   whiskerprops=dict(color=P["BLUE"]), capprops=dict(color=P["BLUE"]), showfliers=False)
-        ax.boxplot(d1, positions=[xi + width / 2], widths=width * 0.9, patch_artist=True,
-                   boxprops=dict(facecolor=P["CORAL"], alpha=0.65), medianprops=dict(color="darkred", lw=2),
-                   whiskerprops=dict(color=P["CORAL"]), capprops=dict(color=P["CORAL"]), showfliers=False)
+        draw_violin(ax, d0, xi - width / 2, width * 0.9, P["BLUE"], P["NAVY"])
+        draw_violin(ax, d1, xi + width / 2, width * 0.9, P["CORAL"], "darkred")
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("Mean shift per RSN (subjects)")
     ax.set_title(f"Shift per RSN: {label_0} vs {label_1}", fontsize=10, color=P["NAVY"])

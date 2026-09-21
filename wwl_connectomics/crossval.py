@@ -21,7 +21,7 @@ from .kernels import build_K, calibrate_lam, calibrate_lam_and_C
 C_GRID = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 100]
 
 
-def nested_cv_kernel(D, y, n_outer, n_inner, seed, lam_method="cv", return_diagnostics=False):
+def nested_cv_kernel(D, y, n_outer, n_inner, seed, lam_method="cv", return_diagnostics=False, n_jobs=-1):
     """lambda calibrated on each train fold (lam_method); C tuned by inner CV."""
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=seed)
     inner = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=seed + 1)
@@ -36,7 +36,7 @@ def nested_cv_kernel(D, y, n_outer, n_inner, seed, lam_method="cv", return_diagn
         if lam_method == "cv":
             # joint (lambda, C) grid search — see calibrate_lam_and_C docstring
             # for why this beats calibrating lambda first with C pinned at 1.0
-            lam, best_C = calibrate_lam_and_C(D_tr, y_tr, C_GRID, seed=seed)
+            lam, best_C = calibrate_lam_and_C(D_tr, y_tr, C_GRID, seed=seed, n_jobs=n_jobs)
         else:
             lam = calibrate_lam(D_tr, y_tr, method=lam_method)
             K_tr_tmp = build_K(D_tr, lam)
@@ -133,7 +133,7 @@ def nested_cv_kernel_ordinal(D, y, n_outer, n_inner, seed, lam_method="cv"):
     return float(np.mean(baccs)), float(np.std(baccs))
 
 
-def nested_cv_flat(SC, FC, y, n_outer, n_inner, seed):
+def nested_cv_flat(SC, FC, y, n_outer, n_inner, seed, return_diagnostics=False):
     """Baseline: upper-triangle SC+FC concatenated, StandardScaler + linear SVM."""
     from sklearn.preprocessing import StandardScaler
 
@@ -143,6 +143,7 @@ def nested_cv_flat(SC, FC, y, n_outer, n_inner, seed):
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=seed)
     inner = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=seed + 1)
     baccs = []
+    y_true_all, y_pred_all = [], []
     for tr, te in outer.split(X, y):
         X_tr, X_te = X[tr], X[te]
         y_tr, y_te = y[tr], y[te]
@@ -160,8 +161,15 @@ def nested_cv_flat(SC, FC, y, n_outer, n_inner, seed):
                 best_acc, best_C = np.mean(accs), C
         svm = SVC(kernel="linear", C=best_C, class_weight="balanced")
         svm.fit(X_tr_s, y_tr)
-        baccs.append(balanced_accuracy_score(y_te, svm.predict(X_te_s)))
-    return float(np.mean(baccs)), float(np.std(baccs))
+        y_pred = svm.predict(X_te_s)
+        baccs.append(balanced_accuracy_score(y_te, y_pred))
+        y_true_all.extend(y_te); y_pred_all.extend(y_pred)
+    result = (float(np.mean(baccs)), float(np.std(baccs)))
+    if not return_diagnostics:
+        return result
+    y_true_all, y_pred_all = np.array(y_true_all), np.array(y_pred_all)
+    return result, {"y_true": y_true_all, "y_pred": y_pred_all,
+                     "cm": confusion_matrix(y_true_all, y_pred_all)}
 
 
 def wl_subtree_kernel(embs_all):
@@ -172,10 +180,11 @@ def wl_subtree_kernel(embs_all):
     return X_n @ X_n.T
 
 
-def nested_cv_subtree(K, y, n_outer, n_inner, seed):
+def nested_cv_subtree(K, y, n_outer, n_inner, seed, return_diagnostics=False):
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=seed)
     inner = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=seed + 1)
     baccs = []
+    y_true_all, y_pred_all = [], []
     for tr, te in outer.split(K, y):
         K_tr, K_te = K[np.ix_(tr, tr)], K[np.ix_(te, tr)]
         y_tr, y_te = y[tr], y[te]
@@ -191,8 +200,15 @@ def nested_cv_subtree(K, y, n_outer, n_inner, seed):
                 best_acc, best_C = np.mean(accs), C
         svm = SVC(kernel="precomputed", C=best_C, class_weight="balanced")
         svm.fit(K_tr, y_tr)
-        baccs.append(balanced_accuracy_score(y_te, svm.predict(K_te)))
-    return float(np.mean(baccs)), float(np.std(baccs))
+        y_pred = svm.predict(K_te)
+        baccs.append(balanced_accuracy_score(y_te, y_pred))
+        y_true_all.extend(y_te); y_pred_all.extend(y_pred)
+    result = (float(np.mean(baccs)), float(np.std(baccs)))
+    if not return_diagnostics:
+        return result
+    y_true_all, y_pred_all = np.array(y_true_all), np.array(y_pred_all)
+    return result, {"y_true": y_true_all, "y_pred": y_pred_all,
+                     "cm": confusion_matrix(y_true_all, y_pred_all)}
 
 
 def lambda_sensitivity_curve(D, y, lam_mu=None, n_splits=3, seed=42, n_points=40, span=(0.02, 100)):
@@ -264,11 +280,51 @@ def select_best_h(FC, SC, y, h_values, n_outer, n_inner, seed, n_jobs=-1):
     for h in h_values:
         embs = [wl_embedding(FC[i], SC[i].copy(), h) for i in range(len(FC))]
         D = build_D(embs, n_jobs=n_jobs)
-        mean_bacc, std_bacc = nested_cv_kernel(D, y, n_outer, n_inner, seed)
+        mean_bacc, std_bacc = nested_cv_kernel(D, y, n_outer, n_inner, seed, n_jobs=n_jobs)
         results[h] = {"mean_bacc": mean_bacc, "std_bacc": std_bacc, "D": D, "embs": embs}
 
     best_h = max(results, key=lambda h: results[h]["mean_bacc"])
     return results, best_h
+
+
+def select_best_h_alpha(FC, SC, y, h_values, alpha_values, n_outer, n_inner, seed,
+                         beta=1.0, n_jobs=-1):
+    """
+    Fractional-propagation analogue of select_best_h: for each (H, alpha)
+    combination, recompute the WL embeddings with the regularized fractional
+    structural propagation (embedding.wl_embedding_fractional, Filippo &
+    Mazza 2026) instead of the direct structural adjacency, then score with
+    the same nested_cv_kernel used for select_best_h's plain-H results — same
+    classifier, same CV splits, same lambda/C calibration — so the two are
+    directly comparable.
+
+    alpha in (0, 1): smaller alpha -> more non-local (closer to the
+    graph-independent limit of Lemma 3.3); alpha -> 1 recovers plain DTI
+    propagation (Filippo & Mazza, Lemma 3.2), i.e. select_best_h's embedding.
+
+    FC, SC       : (S, N, N) arrays, one entry per subject
+    h_values     : iterable of int
+    alpha_values : iterable of float in (0, 1)
+    beta         : float >= 1, non-local scaling shared by all combinations
+                   (Filippo & Mazza Def. 4.1)
+
+    Returns (results, best) where results = {(h, alpha): {"mean_bacc",
+    "std_bacc", "D", "embs"}} and best is the best-scoring (h, alpha) key.
+    """
+    from .distances import build_D
+    from .embedding import wl_embedding_fractional
+
+    results = {}
+    for h in h_values:
+        for alpha in alpha_values:
+            embs = [wl_embedding_fractional(FC[i], SC[i].copy(), h, alpha, beta=beta)
+                    for i in range(len(FC))]
+            D = build_D(embs, n_jobs=n_jobs)
+            mean_bacc, std_bacc = nested_cv_kernel(D, y, n_outer, n_inner, seed, n_jobs=n_jobs)
+            results[(h, alpha)] = {"mean_bacc": mean_bacc, "std_bacc": std_bacc, "D": D, "embs": embs}
+
+    best = max(results, key=lambda k: results[k]["mean_bacc"])
+    return results, best
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -318,7 +374,7 @@ def graph_theory_features(FC, rsn_ids):
     return feats
 
 
-def nested_cv_graphtheory(FC, y, rsn_ids, n_outer, n_inner, seed):
+def nested_cv_graphtheory(FC, y, rsn_ids, n_outer, n_inner, seed, return_diagnostics=False):
     """
     Classic network-neuroscience baseline: graph_theory_features + linear SVM,
     same nested-CV/C-grid structure as nested_cv_flat. A genuinely different
@@ -331,6 +387,7 @@ def nested_cv_graphtheory(FC, y, rsn_ids, n_outer, n_inner, seed):
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=seed)
     inner = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=seed + 1)
     baccs = []
+    y_true_all, y_pred_all = [], []
     for tr, te in outer.split(X, y):
         X_tr, X_te = X[tr], X[te]
         y_tr, y_te = y[tr], y[te]
@@ -347,8 +404,15 @@ def nested_cv_graphtheory(FC, y, rsn_ids, n_outer, n_inner, seed):
                 best_acc, best_C = np.mean(accs), C
         svm = SVC(kernel="linear", C=best_C, class_weight="balanced")
         svm.fit(X_tr_s, y_tr)
-        baccs.append(balanced_accuracy_score(y_te, svm.predict(X_te_s)))
-    return float(np.mean(baccs)), float(np.std(baccs))
+        y_pred = svm.predict(X_te_s)
+        baccs.append(balanced_accuracy_score(y_te, y_pred))
+        y_true_all.extend(y_te); y_pred_all.extend(y_pred)
+    result = (float(np.mean(baccs)), float(np.std(baccs)))
+    if not return_diagnostics:
+        return result
+    y_true_all, y_pred_all = np.array(y_true_all), np.array(y_pred_all)
+    return result, {"y_true": y_true_all, "y_pred": y_pred_all,
+                     "cm": confusion_matrix(y_true_all, y_pred_all)}
 
 
 def shortest_path_histograms(FC, n_bins=30, eps=1e-6):
@@ -385,7 +449,7 @@ def shortest_path_histograms(FC, n_bins=30, eps=1e-6):
     return hists
 
 
-def nested_cv_shortest_path(FC, y, n_outer, n_inner, seed, n_bins=30):
+def nested_cv_shortest_path(FC, y, n_outer, n_inner, seed, n_bins=30, return_diagnostics=False):
     """
     Shortest-path kernel baseline (Borgwardt & Kriegel 2005, histogram
     simplification — see shortest_path_histograms): per-subject
@@ -400,6 +464,7 @@ def nested_cv_shortest_path(FC, y, n_outer, n_inner, seed, n_bins=30):
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=seed)
     inner = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=seed + 1)
     baccs = []
+    y_true_all, y_pred_all = [], []
     for tr, te in outer.split(X, y):
         X_tr, X_te = X[tr], X[te]
         y_tr, y_te = y[tr], y[te]
@@ -418,5 +483,12 @@ def nested_cv_shortest_path(FC, y, n_outer, n_inner, seed, n_bins=30):
         C, gamma = best_params
         svm = SVC(kernel="rbf", C=C, gamma=gamma, class_weight="balanced")
         svm.fit(X_tr_s, y_tr)
-        baccs.append(balanced_accuracy_score(y_te, svm.predict(X_te_s)))
-    return float(np.mean(baccs)), float(np.std(baccs))
+        y_pred = svm.predict(X_te_s)
+        baccs.append(balanced_accuracy_score(y_te, y_pred))
+        y_true_all.extend(y_te); y_pred_all.extend(y_pred)
+    result = (float(np.mean(baccs)), float(np.std(baccs)))
+    if not return_diagnostics:
+        return result
+    y_true_all, y_pred_all = np.array(y_true_all), np.array(y_pred_all)
+    return result, {"y_true": y_true_all, "y_pred": y_pred_all,
+                     "cm": confusion_matrix(y_true_all, y_pred_all)}

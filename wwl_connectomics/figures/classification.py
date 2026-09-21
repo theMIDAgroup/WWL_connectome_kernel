@@ -22,8 +22,13 @@ def _stars(p):
     return "***" if p < 0.001 else "**" if p < 0.01 else "*" if p < 0.05 else "n.s."
 
 
-def plot_accuracy_bars(results, save_path, p_val=None, chance=0.5, title="Balanced accuracy"):
-    """results: {method: (mean, std)}. If method names match METHOD_ORDER they're sorted/labeled accordingly."""
+def plot_accuracy_bars(results, save_path, p_val=None, chance=0.5, title="Balanced accuracy",
+                        ylim=(0.3, 1.12), p_vals=None):
+    """results: {method: (mean, std)}. If method names match METHOD_ORDER they're sorted/labeled accordingly.
+
+    p_vals: optional {method: p_value} to star multiple bars individually
+    (methods not in p_vals get no star). Takes precedence over p_val, which
+    only ever stars bar 0 (kept for backward compatibility)."""
     P = get_palette(); apply_style()
     methods = [m for m in METHOD_ORDER if m in results] or list(results.keys())
     labels = [METHOD_LABELS.get(m, m) for m in methods]
@@ -39,16 +44,22 @@ def plot_accuracy_bars(results, save_path, p_val=None, chance=0.5, title="Balanc
                   yerr=sds, capsize=5, error_kw={"elinewidth": 1.5})
     bars[0].set_edgecolor(P["NAVY"]); bars[0].set_linewidth(2)
     ax.axhline(chance, color=P["GRAY"], lw=1.2, linestyle=":", label=f"Chance ({chance})")
-    if p_val is not None:
+    if p_vals is not None:
+        for i, m in enumerate(methods):
+            if m in p_vals:
+                ax.text(i, mus[i] + sds[i] + 0.02, _stars(p_vals[m]), ha="center", va="bottom",
+                        fontsize=15, color=P["NAVY"], fontweight="bold")
+    elif p_val is not None:
         ax.text(0, mus[0] + sds[0] + 0.02, _stars(p_val), ha="center", va="bottom",
-                fontsize=12, color=P["NAVY"], fontweight="bold")
-    ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=8.5)
-    ax.set_ylim(0.3, 1.12)
-    ax.set_title(title, fontsize=11, color=P["NAVY"], fontweight="bold")
+                fontsize=15, color=P["NAVY"], fontweight="bold")
+    ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=12)
+    ax.set_ylim(*ylim)
+    ax.set_title(title, fontsize=15, color=P["NAVY"], fontweight="bold")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", alpha=0.3)
-    ax.set_ylabel("Balanced accuracy", color=P["GRAY"])
-    ax.legend(fontsize=8, framealpha=0.7, loc="lower right")
+    ax.set_ylabel("Balanced accuracy", color=P["GRAY"], fontsize=13)
+    ax.tick_params(axis="y", labelsize=11)
+    ax.legend(fontsize=11, framealpha=0.7, loc="lower right")
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])
     plt.close(fig)

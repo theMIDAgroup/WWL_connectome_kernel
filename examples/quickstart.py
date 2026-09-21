@@ -3,7 +3,9 @@ quickstart.py
 ==============
 Minimal end-to-end usage of the WWL connectome kernel: given a collection of
 per-subject structural (SC) and functional (FC) connectivity matrices plus a
-group label, build the kernel and classify.
+group label, build the kernel and classify. Also demonstrates the
+non-local, regularized-fractional-Laplacian propagation alternative
+(Filippo & Mazza 2026) — same pipeline, one different embedding call.
 
 This script assumes you already have your connectomes as three NumPy arrays:
 
@@ -28,7 +30,7 @@ import numpy as np
 
 from wwl_connectomics.crossval import nested_cv_kernel
 from wwl_connectomics.distances import build_D, kernel_pca_2d
-from wwl_connectomics.embedding import wl_embedding
+from wwl_connectomics.embedding import wl_embedding, wl_embedding_fractional
 from wwl_connectomics.figures import plot_kernel_pca
 from wwl_connectomics.kernels import build_K, calibrate_lam
 from wwl_connectomics.synthetic import make_group_A, make_group_B
@@ -91,6 +93,24 @@ def main():
     fig_path = os.path.join(out_dir, "kernel_pca.png")
     plot_kernel_pca(Z, list(y), fig_path)
     print(f"Kernel PCA figure saved to {fig_path}")
+
+    # 5. (Optional) Non-local structural propagation via the regularized
+    #    fractional graph Laplacian (Filippo & Mazza 2026): a single WL step
+    #    already reaches the whole structural graph, with edge weight
+    #    decaying by a power law in hop distance, instead of only the H-hop
+    #    neighbourhood step 1 used. Same embedding -> distance -> kernel ->
+    #    nested-CV pipeline as above, just swap wl_embedding for
+    #    wl_embedding_fractional (alpha -> 1 recovers plain wl_embedding;
+    #    alpha -> 0 is maximally non-local). alpha and beta are ordinary
+    #    hyperparameters — tune them the same way as H, e.g. with
+    #    crossval.select_best_h_alpha.
+    print("Computing fractional WL embeddings (H=2, alpha=0.5, beta=1.0)...")
+    embeddings_frac = [wl_embedding_fractional(FC[i], SC[i].copy(), H=2, alpha=0.5, beta=1.0)
+                        for i in range(S)]
+    D_frac = build_D(embeddings_frac, n_jobs=-1)
+    mean_bacc_frac, std_bacc_frac = nested_cv_kernel(
+        D_frac, y, n_outer=5, n_inner=3, seed=42, lam_method="cv")
+    print(f"Balanced accuracy (fractional propagation): {mean_bacc_frac:.3f} +/- {std_bacc_frac:.3f}")
 
 
 if __name__ == "__main__":

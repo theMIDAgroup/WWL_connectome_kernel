@@ -6,6 +6,7 @@ wwl_benchmark.py ("1/mu" and "cv"), make_scenario_figures.py
 """
 
 import numpy as np
+from joblib import Parallel, delayed
 from scipy.optimize import minimize_scalar
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.model_selection import StratifiedKFold
@@ -54,13 +55,20 @@ def calibrate_lam(D_train, y_train=None, method="cv"):
     return best_lam
 
 
-def calibrate_lam_and_C(D_train, y_train, C_grid, n_splits=3, seed=0, lam_grid=None):
+def calibrate_lam_and_C(D_train, y_train, C_grid, n_splits=3, seed=0, lam_grid=None, n_jobs=-1):
     """
     Jointly grid-search (lambda, C) via inner CV, instead of calibrating
     lambda first with C pinned at 1.0 (calibrate_lam's "cv" method) and only
     then searching C with that lambda fixed — the two interact (a larger
     lambda makes K peakier, which shifts the SVM's effective margin and thus
     the optimal C), so a sequential search can miss the joint optimum.
+
+    The (lambda, C) grid is embarrassingly parallel (each combo's inner-CV
+    score is independent of every other) — at N in the hundreds-to-thousands
+    this loop (default 15x9=135 combos x n_splits fits) dominates
+    nested_cv_kernel's wall time far more than build_D, so it's parallelized
+    the same way build_D is (joblib threads; libsvm's C core releases the
+    GIL during SVC.fit/predict, so threads give a real speedup here).
 
     Returns (best_lam, best_C).
     """
@@ -70,19 +78,22 @@ def calibrate_lam_and_C(D_train, y_train, C_grid, n_splits=3, seed=0, lam_grid=N
         lam_grid = np.logspace(np.log10(lam_mu * 0.05), np.log10(lam_mu * 50), 15)
 
     inner = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
-    best_lam, best_C, best_acc = lam_mu, C_grid[len(C_grid) // 2], -1
-    for lam in lam_grid:
+    splits = list(inner.split(D_train, y_train))
+
+    def _score(lam, C):
         K = np.exp(-lam * D_train)
-        for C in C_grid:
-            accs = []
-            for itr, ite in inner.split(K, y_train):
-                svm = SVC(kernel="precomputed", C=C, class_weight="balanced")
-                svm.fit(K[np.ix_(itr, itr)], y_train[itr])
-                accs.append(balanced_accuracy_score(
-                    y_train[ite], svm.predict(K[np.ix_(ite, itr)])))
-            mu = float(np.mean(accs))
-            if mu > best_acc:
-                best_acc, best_lam, best_C = mu, lam, C
+        accs = []
+        for itr, ite in splits:
+            svm = SVC(kernel="precomputed", C=C, class_weight="balanced")
+            svm.fit(K[np.ix_(itr, itr)], y_train[itr])
+            accs.append(balanced_accuracy_score(
+                y_train[ite], svm.predict(K[np.ix_(ite, itr)])))
+        return float(np.mean(accs))
+
+    combos = [(lam, C) for lam in lam_grid for C in C_grid]
+    scores = Parallel(n_jobs=n_jobs, prefer="threads")(
+        delayed(_score)(lam, C) for lam, C in combos)
+    best_lam, best_C = combos[int(np.argmax(scores))]
     return best_lam, best_C
 
 

@@ -12,10 +12,13 @@ style       - color palette and matplotlib rcParams
 atlas       - Schaefer-100 / 7-Yeo-network layout (single source of truth)
 synthetic   - synthetic FC/DTI group generators (demos, smoke tests)
 io          - matrix loading/normalization, anagrafica loading, scenario file discovery
-embedding   - wl_embedding (WL propagation)
+embedding   - wl_embedding (WL propagation), wl_embedding_fractional (regularized
+              fractional-Laplacian propagation, Filippo & Mazza 2026)
+fractional  - regularized fractional graph Laplacian (Filippo & Mazza 2026)
 distances   - wasserstein_1/2, build_D, kernel_pca_2d
 kernels     - calibrate_lam, build_K, METHOD_ORDER/METHOD_LABELS
-crossval    - nested_cv_kernel/_flat/_subtree, permutation_test
+crossval    - nested_cv_kernel/_flat/_subtree, permutation_test, select_best_h,
+              select_best_h_alpha (fractional-propagation sweep)
 labels      - real-data session selection + anagrafica target-label extraction
 shifts      - per-region embedding shift + group statistics
 figures.*   - one function per standalone, saveable figure
@@ -24,11 +27,11 @@ reports     - convenience wrappers combining several atomic figures into the
 """
 
 from . import (
-    atlas, crossval, distances, embedding, figures, io, kernels, labels,
-    reports, shifts, style, synthetic,
+    atlas, crossval, distances, embedding, figures, fractional, io, kernels,
+    labels, reports, shifts, style, synthetic,
 )
 
 __all__ = [
-    "atlas", "crossval", "distances", "embedding", "figures", "io",
-    "kernels", "labels", "reports", "shifts", "style", "synthetic",
+    "atlas", "crossval", "distances", "embedding", "figures", "fractional",
+    "io", "kernels", "labels", "reports", "shifts", "style", "synthetic",
 ]

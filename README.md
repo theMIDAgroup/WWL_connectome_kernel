@@ -11,6 +11,16 @@ of the Wasserstein-1 distance between the resulting multi-scale node
 embeddings, usable directly by any kernel-based classifier and for
 visualization (kernel PCA/LDA, embedding shift, optimal transport plans).
 
+Propagation can use either the direct structural graph (`H`-hop local
+averaging) or a non-local alternative, the regularized fractional graph
+Laplacian of Filippo & Mazza 2026: every real structural edge keeps its own
+weight, and every other pair of regions gets an additional, power-law-decaying
+long-range weight, so a single WL step already reaches the whole structural
+graph instead of only its `H`-hop neighbourhood. The two are combined the
+same way everywhere in the package — `wl_embedding` vs.
+`wl_embedding_fractional`, `select_best_h` vs. `select_best_h_alpha` — so
+switching between them never changes any other part of the pipeline.
+
 ## Repository layout
 
 ```
@@ -60,19 +70,36 @@ does not change.
 - **Embedding**: `wwl_connectomics.embedding.wl_embedding` — WL continuous
   propagation of FC node attributes along DTI-weighted structural edges,
   `H` iterations, stacked into one `(N, N·(H+1))` point cloud per subject.
+  `wl_embedding_fractional` is the drop-in non-local variant (same
+  signature plus `alpha`, `beta`), built on `wwl_connectomics.fractional`.
+- **Fractional propagation**: `wwl_connectomics.fractional` — regularized
+  fractional graph Laplacian (`fractional_laplacian`,
+  `regularized_fractional_weight`); `alpha in (0, 1]` interpolates between
+  the local operator (`alpha -> 1`) and an entirely non-local,
+  topology-blind one (`alpha -> 0`), `beta >= 1` scales the non-local
+  component. Guaranteed superdiffusive (never slower-mixing than plain DTI
+  propagation) for small enough `alpha` on essentially any graph — the
+  unregularized fractional Laplacian does not have that guarantee in
+  general (see the module docstring for the precise condition).
 - **Distance**: `wwl_connectomics.distances.build_D` — pairwise Wasserstein-1
   distance between embeddings (parallelized).
 - **Kernel**: `wwl_connectomics.kernels` — Laplacian kernel `K = exp(-λD)`,
-  with `1/μ`, Fisher-separability, or nested-CV bandwidth calibration.
+  with `1/μ`, Fisher-separability, or nested-CV bandwidth calibration; the
+  joint `(λ, C)` grid search is parallelized.
 - **Cross-validation**: `wwl_connectomics.crossval` — nested stratified CV
-  with joint `(λ, C)` grid search, WL-depth (`H`) selection, permutation
-  testing, and the graph-theory / shortest-path / WL-subtree baselines.
+  with joint `(λ, C)` grid search, WL-depth (`H`) selection (`select_best_h`)
+  or joint `(H, alpha)` selection for fractional propagation
+  (`select_best_h_alpha`), permutation testing, and the graph-theory /
+  shortest-path / WL-subtree baselines.
 - **Figures**: `wwl_connectomics.figures` — every plotting function saves
   exactly one atomic PNG; `wwl_connectomics.reports` composes them into the
   combined multi-panel layouts.
 
-Reference: Togninalli, M., Ghisu, E., Llinares-López, F., Rieck, B.,
+References: Togninalli, M., Ghisu, E., Llinares-López, F., Rieck, B.,
 Borgwardt, K. *Wasserstein Weisfeiler-Lehman Graph Kernels*. NeurIPS 2019.
+Filippo, A., Mazza, M. *Spectral and computational aspects of a regularized
+fractional Laplacian for non-local diffusion on graphs*. J. Numer. Math.
+2026, doi:10.1515/jnma-2026-0007.
 
 ## License
 
