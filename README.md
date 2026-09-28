@@ -103,4 +103,5 @@ fractional Laplacian for non-local diffusion on graphs*. J. Numer. Math.
 
 ## License
 
-Not yet chosen — add a `LICENSE` file before making this repository public.
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/legalcode.en) — see [`LICENSE`](LICENSE).
+
