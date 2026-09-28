@@ -151,7 +151,7 @@ def plot_kernel_pca_colored(Z, values, col_name, save_path):
 
     ax.set_xlabel("PC1 (kernel PCA)")
     ax.set_ylabel("PC2 (kernel PCA)")
-    ax.set_title(f"Kernel PCA — colored by '{col_name}'", fontsize=11, fontweight="bold")
+    ax.set_title(f"Kernel PCA colored by '{col_name}'", fontsize=11, fontweight="bold")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(alpha=0.25)
     fig.tight_layout()

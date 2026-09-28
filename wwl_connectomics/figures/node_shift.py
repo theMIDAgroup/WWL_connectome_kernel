@@ -20,6 +20,7 @@ represented in this codebase:
 
 import numpy as np
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from scipy.stats import mannwhitneyu
@@ -62,8 +63,8 @@ def plot_embedding_shift_2d(emb, region_names, save_path, subject_label=None, h_
 
     fig, ax = plt.subplots(figsize=(8, 6.2))
     title = "Node embedding shift"
-    if subject_label: title += f" — {subject_label}"
-    if h_iter is not None: title += f"  (iter 0 → iter {h_iter})"
+    if subject_label: title += f", {subject_label}"
+    if h_iter is not None: title += f"  (iter 0 to iter {h_iter})"
     fig.suptitle(title, fontsize=12, fontweight="bold", color=P["NAVY"])
 
     ax.scatter(X0_2d[:, 0], X0_2d[:, 1], c=col0, s=200, marker="o",
@@ -207,7 +208,6 @@ def plot_shift_distribution_by_network(shift_A, shift_B, networks, save_path, la
 
 def plot_mean_shift_heatmap(shift_A, shift_B, networks, save_path, label_A="A", label_B="B"):
     """Heatmap of per-network mean shift for two individual subjects."""
-    from matplotlib.colors import LinearSegmentedColormap
     P = get_palette(); apply_style()
     net_names = list(networks.keys())
     nn = len(net_names)

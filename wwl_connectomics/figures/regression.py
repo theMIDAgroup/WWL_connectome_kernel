@@ -105,7 +105,7 @@ def plot_regions_scatter_grid(shift, y, region_names, save_path, top_n=12,
     for ax in axes[len(top_idx):]:
         ax.axis("off")
 
-    fig.suptitle(f"Top-{len(top_idx)} regions by |r| — shift vs {target_label}",
+    fig.suptitle(f"Top {len(top_idx)} regions by |r|, shift vs {target_label}",
                  fontsize=12, color=P["NAVY"], fontweight="bold", y=1.02)
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])

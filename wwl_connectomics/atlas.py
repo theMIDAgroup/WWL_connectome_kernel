@@ -7,6 +7,10 @@ it everywhere instead.
 
 from functools import lru_cache
 
+from matplotlib.patches import Patch
+from nilearn import datasets
+from nilearn.plotting import find_parcellation_cut_coords
+
 NETWORKS = {
     "Vis":         (list(range(0,  14)), "#7B1F9C"),
     "SomMot":      (list(range(14, 28)), "#4682B4"),
@@ -38,9 +42,6 @@ def get_schaefer_coords(n_rois=100, yeo_networks=7):
     Returns (coords, labels) where coords is (n_rois, 3) and labels excludes
     the "Background" entry nilearn prepends.
     """
-    from nilearn import datasets
-    from nilearn.plotting import find_parcellation_cut_coords
-
     atlas = datasets.fetch_atlas_schaefer_2018(n_rois=n_rois, yeo_networks=yeo_networks)
     coords = find_parcellation_cut_coords(atlas.maps)
     labels = [l.decode() if isinstance(l, bytes) else l for l in atlas.labels]
@@ -55,5 +56,4 @@ def node_colors_from_labels(labels, networks=NETWORKS):
 
 def legend_handles(networks=NETWORKS):
     """Matplotlib Patch handles for a network-color legend."""
-    from matplotlib.patches import Patch
     return [Patch(facecolor=col, label=name) for name, (_, col) in networks.items()]

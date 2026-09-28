@@ -22,14 +22,15 @@ def get_palette():
 
 
 def apply_style():
+    """Color/grid style only — font is left at matplotlib's own default
+    (rcParamsDefault, currently DejaVu Sans) rather than pinned here."""
     P = get_palette()
     plt.rcParams.update({
         "figure.facecolor": P["WHITE"], "axes.facecolor": P["WHITE"],
         "axes.edgecolor":   P["LGRAY"], "axes.labelcolor": P["NAVY"],
         "xtick.color":      P["GRAY"],  "ytick.color":     P["GRAY"],
         "text.color":       P["NAVY"],  "grid.color":      P["LGRAY"],
-        "grid.linewidth":   0.5,        "font.family":     "sans-serif",
-        "font.size":        10,
+        "grid.linewidth":   0.5,        "font.size":       10,
     })
 
 

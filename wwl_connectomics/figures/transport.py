@@ -1,6 +1,7 @@
 """Optimal-transport-plan figures (split from graphic_aux's 2-panel plot_transport_plan)."""
 
 import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
 
 import matplotlib.pyplot as plt
 
@@ -23,7 +24,6 @@ def plot_transport_plan(P_star, networks, save_path, net_names=None):
     """Row-normalized network-level optimal transport plan."""
     P = get_palette(); apply_style()
     net_names = net_names or list(networks.keys())
-    from matplotlib.colors import LinearSegmentedColormap
     P_net = aggregate_to_networks(P_star, networks, agg="sum")
     P_norm = P_net / (P_net.sum(axis=1, keepdims=True) + 1e-12)
 
@@ -53,7 +53,6 @@ def plot_ground_distance(M_dist, networks, save_path, net_names=None):
     """Network-level mean Euclidean ground distance underlying the transport plan."""
     P = get_palette(); apply_style()
     net_names = net_names or list(networks.keys())
-    from matplotlib.colors import LinearSegmentedColormap
     M_net = aggregate_to_networks(M_dist, networks, agg="mean")
 
     cmap = LinearSegmentedColormap.from_list("ds", ["white", "#F5C4B3", "#D85A30", "#7A2810"])

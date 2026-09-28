@@ -10,8 +10,12 @@ import os
 
 import networkx as nx
 import numpy as np
+from matplotlib.lines import Line2D
+from nilearn.plotting import plot_connectome
+
 import matplotlib.pyplot as plt
 
+from .. import atlas as atlas_mod
 from ..style import apply_style, get_palette
 
 
@@ -131,17 +135,12 @@ def plot_functional_layer(FC, pos, node_colors, save_path, region_names=None,
     return save_path
 
 
-def plot_glass_brain(shift_vals, FC, save_path, networks, top_pct=20, display_mode="lyrz"):
+def plot_glass_brain(shift_vals, FC, save_path, networks, top_pct=20, display_mode="lyrz",
+                      edge_keep_percentile=85):
     """
     Glass-brain plot: node size ∝ shift, edges = FC (top-shift nodes only).
     Node coordinates/labels come from atlas.get_schaefer_coords (nilearn, cached).
     """
-    from nilearn.plotting import plot_connectome
-    import matplotlib.patches as mpatches
-    from matplotlib.lines import Line2D
-
-    from .. import atlas as atlas_mod
-
     P = get_palette(); apply_style()
 
     coords, labels = atlas_mod.get_schaefer_coords(n_rois=FC.shape[0])
@@ -173,10 +172,11 @@ def plot_glass_brain(shift_vals, FC, save_path, networks, top_pct=20, display_mo
     off_diag = conn_top[~np.eye(n_top, dtype=bool)]
     nonzero = off_diag[off_diag != 0]
     if nonzero.size > 0:
-        edge_thr = np.percentile(np.abs(nonzero), 85)
+        edge_thr = np.percentile(np.abs(nonzero), edge_keep_percentile)
         conn_top[np.abs(conn_top) < edge_thr] = 0
     n_edges_kept = int((conn_top != 0).sum() / 2)
-    print(f"  [glass brain] {n_top} nodes, {n_edges_kept} edges kept (threshold = 85th pct)")
+    print(f"  [glass brain] {n_top} nodes, {n_edges_kept} edges kept "
+          f"(threshold = {edge_keep_percentile}th pct)")
 
     fig, ax = plt.subplots(figsize=(16, 4.5), facecolor=P["WHITE"])
     plot_connectome(

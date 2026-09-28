@@ -8,6 +8,7 @@ wwl_real_node_shift.plot_node_shift_ranking.
 """
 
 import numpy as np
+import pandas as pd
 from scipy.stats import mannwhitneyu
 
 
@@ -19,12 +20,13 @@ def compute_shifts(embs, N):
     ])
 
 
-def compute_region_shift_stats(shifts_0, shifts_1):
+def compute_region_shift_stats(shifts_0, shifts_1, alpha=0.05):
     """
     Per-region shift statistics between two groups (shifts_0/1: (S, N) arrays).
     delta = mean_1 - mean_0 (positive => more shift in group 1).
     p_mw  : one-sided Mann-Whitney (group 1 > group 0), per region
     p_fdr : Benjamini-Hochberg corrected p_mw
+    alpha : FDR significance threshold for the "significant" mask
     """
     N = shifts_0.shape[1]
     mu_0, sd_0 = shifts_0.mean(axis=0), shifts_0.std(axis=0)
@@ -39,7 +41,7 @@ def compute_region_shift_stats(shifts_0, shifts_1):
     p_fdr = np.empty(N)
     for rank, idx in enumerate(order):
         p_fdr[idx] = min(p_vals[idx] * N / (rank + 1), 1.0)
-    significant = p_fdr < 0.05
+    significant = p_fdr < alpha
 
     return {
         "mu_0": mu_0, "sd_0": sd_0, "mu_1": mu_1, "sd_1": sd_1,
@@ -49,8 +51,6 @@ def compute_region_shift_stats(shifts_0, shifts_1):
 
 def region_shift_dataframe(stats, region_names, rsn_labels=None, label_0="group0", label_1="group1"):
     """Tidy DataFrame from compute_region_shift_stats output, sorted by |delta| desc... actually delta desc."""
-    import pandas as pd
-
     data = {
         "region": region_names,
         f"mean_shift_{label_0}": stats["mu_0"],

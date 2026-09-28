@@ -25,12 +25,14 @@ METHOD_LABELS = {
 }
 
 
-def calibrate_lam(D_train, y_train=None, method="cv"):
+def calibrate_lam(D_train, y_train=None, method="cv", lam_grid=None, n_splits=3, seed=0):
     """
     Calibrate lambda for the Laplacian kernel K = exp(-lambda * D).
 
     method="1/mu" : lambda = 1 / mean(D_train)  [fast, no labels needed]
-    method="cv"   : lambda chosen by 3-fold CV on training distances [better]
+    method="cv"   : lambda chosen by n_splits-fold CV on training distances [better]
+    lam_grid      : candidate lambdas for method="cv" (default: 30 points
+                    log-spaced over [lam_mu*0.05, lam_mu*50]).
     """
     vals = D_train[np.triu_indices(len(D_train), k=1)]
     lam_mu = 1.0 / (vals.mean() + 1e-9)
@@ -38,8 +40,9 @@ def calibrate_lam(D_train, y_train=None, method="cv"):
     if method == "1/mu" or y_train is None:
         return lam_mu
 
-    lam_grid = np.logspace(np.log10(lam_mu * 0.05), np.log10(lam_mu * 50), 30)
-    inner = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
+    if lam_grid is None:
+        lam_grid = np.logspace(np.log10(lam_mu * 0.05), np.log10(lam_mu * 50), 30)
+    inner = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
     best_lam, best_acc = lam_mu, -1
     for lam in lam_grid:
         K = np.exp(-lam * D_train)
@@ -97,18 +100,21 @@ def calibrate_lam_and_C(D_train, y_train, C_grid, n_splits=3, seed=0, lam_grid=N
     return best_lam, best_C
 
 
-def calibrate_lam_fisher(D, groups):
+def calibrate_lam_fisher(D, groups, bounds=None):
     """
     Lambda that maximizes Fisher separability (intra- vs inter-group kernel
     similarity) rather than classification accuracy.
 
     groups: array-like of group labels, one per row/col of D (any number of
     distinct values >= 2; only the intra/inter split matters).
+    bounds: (lam_min, lam_max) search interval (default: (1e-4, lam_mu*50)).
     Returns (lam_fisher, lam_mu).
     """
     groups = np.asarray(groups)
     S = len(D)
     lam_mu = 1.0 / (D[D > 0].mean() + 1e-9)
+    if bounds is None:
+        bounds = (1e-4, lam_mu * 50)
 
     intra, inter = [], []
     for i in range(S):
@@ -122,7 +128,7 @@ def calibrate_lam_fisher(D, groups):
         var = (ki.var() + ke.var()) / 2 + 1e-9
         return -sep ** 2 / var
 
-    res = minimize_scalar(neg_fisher, bounds=(1e-4, lam_mu * 50), method="bounded")
+    res = minimize_scalar(neg_fisher, bounds=bounds, method="bounded")
     return res.x, lam_mu
 
 

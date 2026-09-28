@@ -22,12 +22,15 @@ import matplotlib.patches as mpatches
 from matplotlib.colors import LinearSegmentedColormap
 from scipy.stats import mannwhitneyu
 from sklearn.decomposition import PCA
+from sklearn.metrics import balanced_accuracy_score
+from sklearn.model_selection import StratifiedKFold
+from sklearn.svm import SVC
 
 import matplotlib.pyplot as plt
 
 from . import atlas as atlas_mod
 from .crossval import lambda_sensitivity_curve
-from .kernels import build_K, calibrate_lam_fisher
+from .kernels import build_K, calibrate_lam_fisher, METHOD_LABELS, METHOD_ORDER
 from .shifts import compute_region_shift_stats, region_shift_dataframe
 from .style import apply_style, draw_violin, get_palette
 
@@ -150,10 +153,6 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
 
 def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=None):
     """4-panel distance/lambda figure (replaces wwl_benchmark.plot_distance_lambda)."""
-    from sklearn.metrics import balanced_accuracy_score
-    from sklearn.model_selection import StratifiedKFold
-    from sklearn.svm import SVC
-
     P = get_palette(); apply_style()
     S = len(y)
     intra_0, intra_1, inter = _intra_inter(D, n_each)
@@ -310,8 +309,6 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
 
 def report_accuracy_comparison(all_results, save_path):
     """Multi-scenario accuracy grid (replaces wwl_benchmark.plot_accuracy_comparison)."""
-    from .kernels import METHOD_LABELS, METHOD_ORDER
-
     P = get_palette(); apply_style()
     n_scen = len(all_results)
     fig, axes = plt.subplots(1, n_scen, figsize=(4.5 * n_scen, 5.5), sharey=True)

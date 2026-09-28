@@ -8,6 +8,10 @@ reimplemented here to avoid the exact duplication this module set out to fix.
 
 import numpy as np
 from matplotlib.patches import Ellipse
+from scipy.stats import chi2
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 import matplotlib.pyplot as plt
 
@@ -22,8 +26,6 @@ def _draw_confidence_ellipse(ax, points_2d, color, confidence=0.95, **kwargs):
     so confidence=0.95 is an honest ~95% coverage ellipse, not just "2 std".
     Silently skips groups with too few points to estimate a covariance.
     """
-    from scipy.stats import chi2
-
     if len(points_2d) < 3:
         return
     cov = np.cov(points_2d, rowvar=False)
@@ -50,8 +52,6 @@ def plot_group_pca(X, group_sizes, save_path, title=None, seed=42, confidence=0.
     (skipped for groups with <3 points); if exactly 2 groups, annotates a
     separation index. Returns (Z, explained_variance_ratio, separation_or_None).
     """
-    from sklearn.decomposition import PCA
-
     P = get_palette(); apply_style()
     cats = list(group_sizes.keys())
     n_cats = len(cats)
@@ -124,9 +124,6 @@ def plot_lda_projection(X, group_sizes, save_path, title=None, cv_splits=5, seed
 
     Returns (Z, cv_balanced_accuracy).
     """
-    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-    from sklearn.model_selection import StratifiedKFold, cross_val_score
-
     P = get_palette(); apply_style()
     cats = list(group_sizes.keys())
     n_cats = len(cats)

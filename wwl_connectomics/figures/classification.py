@@ -43,7 +43,7 @@ def plot_accuracy_bars(results, save_path, p_val=None, chance=0.5, title="Balanc
     bars = ax.bar(x, mus, 0.6, color=colors, alpha=0.85,
                   yerr=sds, capsize=5, error_kw={"elinewidth": 1.5})
     bars[0].set_edgecolor(P["NAVY"]); bars[0].set_linewidth(2)
-    ax.axhline(chance, color=P["GRAY"], lw=1.2, linestyle=":", label=f"Chance ({chance})")
+    ax.axhline(chance, color=P["GRAY"], lw=1.2, linestyle=":", label=f"Chance ({chance:.3g})")
     if p_vals is not None:
         for i, m in enumerate(methods):
             if m in p_vals:
@@ -85,7 +85,7 @@ def plot_h_selection(results, save_path, chance=0.5, best_h=None, title="WL dept
     best_idx = h_values.index(best_h)
     bars[best_idx].set_edgecolor(P["NAVY"]); bars[best_idx].set_linewidth(2.5)
     bars[best_idx].set_facecolor(P["BLUE"])
-    ax.axhline(chance, color=P["GRAY"], lw=1.2, linestyle=":", label=f"Chance ({chance})")
+    ax.axhline(chance, color=P["GRAY"], lw=1.2, linestyle=":", label=f"Chance ({chance:.3g})")
     ax.set_xlabel("H (WL propagation iterations)", color=P["GRAY"])
     ax.set_ylabel("Balanced accuracy (nested CV)", color=P["GRAY"])
     ax.set_title(f"{title}\nbest H = {best_h}", fontsize=10, color=P["NAVY"], fontweight="bold")
