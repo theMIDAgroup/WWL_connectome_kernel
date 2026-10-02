@@ -22,6 +22,5 @@ napoleon_numpy_docstring = True
 napoleon_google_docstring = False
 
 templates_path = []
-html_static_path = ["_static"]
 html_theme = "sphinx_rtd_theme"
 exclude_patterns = ["_build"]
