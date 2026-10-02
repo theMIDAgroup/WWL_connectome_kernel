@@ -1,10 +1,4 @@
 """Per-subject, per-region embedding shift (||a^H(r) - a^0(r)||) and group statistics.
-
-compute_shifts used to be reimplemented identically in wwl_benchmark.py
-(inline in run_scenario), make_scenario_figures.py and wwl_real_node_shift.py.
-compute_region_shift_stats centralizes the FDR-corrected Mann-Whitney block
-duplicated between wwl_benchmark.plot_population_shift and
-wwl_real_node_shift.plot_node_shift_ranking.
 """
 
 import numpy as np

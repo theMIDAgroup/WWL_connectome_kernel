@@ -1,8 +1,4 @@
 """Single source of truth for the Schaefer-100 (7 Yeo networks) layout.
-
-This exact dict used to be copy-pasted verbatim in wwl_benchmark.py (twice),
-make_scenario_figures.py and WWL_full_pipeline.py — keep it here and import
-it everywhere instead.
 """
 
 from functools import lru_cache

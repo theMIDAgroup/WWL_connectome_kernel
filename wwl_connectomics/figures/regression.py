@@ -1,4 +1,4 @@
-"""Regression-result figures (continuous target, e.g. MMSE) — one PNG per function."""
+"""Regression-result figures (continuous target, e.g. MMSE), one PNG per function."""
 
 import numpy as np
 from matplotlib.patches import Patch
@@ -41,11 +41,11 @@ def plot_regression_scatter(y_true, y_pred, save_path, label="target", r2=None, 
 
 def plot_scatter_regression(x, y, save_path, xlabel="x", ylabel="y", title=None):
     """
-    Scatter tra due variabili REALI (non predetta vs vera) con retta di
-    regressione OLS (scipy.stats.linregress) e r/p annotati. Uso tipico:
-    x = shift di embedding (di una regione o aggregato), y = variabile
-    clinica reale (es. MMSE) — per vedere la correlazione grezza, non una
-    performance di modello.
+    Scatter plot of two variables (predicted vs. actual) with an
+    OLS regression line (scipy.stats.linregress) and r/p values annotated. Typical use:
+    x = embedding shift (of a region or aggregate), y = actual
+    clinical variable (e.g., MMSE), to examine the raw correlation, not
+    model performance.
     """
     P = get_palette(); apply_style()
     x = np.asarray(x, dtype=float); y = np.asarray(y, dtype=float)
@@ -71,11 +71,11 @@ def plot_scatter_regression(x, y, save_path, xlabel="x", ylabel="y", title=None)
 def plot_regions_scatter_grid(shift, y, region_names, save_path, top_n=12,
                                target_label="MMSE", n_cols=4, ranked_idx=None):
     """
-    Griglia (piccoli multipli) di scatter shift-regione vs target, uno per
-    regione, con retta OLS e r/p per pannello — un solo PNG.
+    Grid (small multiples) of scatter shift-region vs target, one per
+    region, with OLS line and r/p per panel, single PNG.
 
-    ranked_idx : indici delle regioni da mostrare, in ordine (es. per |r|
-                 decrescente); se None, calcolate qui da zero via |pearson r|.
+    ranked_idx : indices of regions to show, in order (e.g., by |r|
+                 decreasing); if None, calculated here from zero via |pearson r|.
     """
     P = get_palette(); apply_style()
     shift = np.asarray(shift, dtype=float); y = np.asarray(y, dtype=float)

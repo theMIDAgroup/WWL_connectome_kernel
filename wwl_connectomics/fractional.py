@@ -12,13 +12,7 @@ Laplacian lets a single propagation step reach the whole structural graph,
 with edge weight decaying by a power law in hop distance, while the
 *regularized* variant (the one used everywhere here) provably keeps the
 subject's real structural edges intact and is superdiffusive for small
-enough alpha on essentially any graph (Filippo & Mazza, Thm. 4.12). The
-raw fractional graph only has that guarantee, for every alpha in (0, 1),
-when the *largest* eigenvalue of Delta satisfies lambda_max(Delta) <= 1
-(Lemma 3.5) — a condition that commonly fails for hub-heavy structural
-connectomes (a few high-degree hubs inflate lambda_max, not the algebraic
-connectivity lambda_{n-1}(Delta), which Lemma 2.5 bounds by the graph's
-*smallest* nodal degree instead).
+enough alpha on essentially any graph (Filippo & Mazza, Thm. 4.12). 
 """
 
 import numpy as np
@@ -59,7 +53,7 @@ def regularized_fractional_weight(W, alpha, beta=1.0):
 
     Keeps the subject's own structural weight w_ij on every edge already
     present in W, and assigns beta * w^alpha_ij (the fractional-graph weight)
-    to every pair with no direct structural edge — so short-range structure
+    to every pair with no direct structural edge, so short-range structure
     is untouched and long-range "jumps" are added on top of it, rather than
     replacing it as the raw fractional graph does.
 
@@ -74,8 +68,7 @@ def regularized_fractional_weight(W, alpha, beta=1.0):
     Returns
     -------
     rW, Delta, Delta_alpha : the regularized weight matrix and the two
-    Laplacians it was built from (returned for diagnostics, e.g. checking
-    algebraic connectivity superdiffusion per Filippo & Mazza Thm. 4.12).
+    Laplacians it was built.
     """
     W = np.asarray(W, dtype=np.float64)
     Delta = graph_laplacian(W)

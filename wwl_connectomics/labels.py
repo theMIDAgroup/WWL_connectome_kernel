@@ -1,8 +1,4 @@
 """Real-data subject/session selection and anagrafica target-label extraction.
-
-Ported from wwl_real_first_session.py so the other wwl_real_*.py scripts (and
-any future ones) can import it directly instead of re-implementing/duplicating
-it (load_anagrafica used to be byte-identical duplicated code).
 """
 
 import re

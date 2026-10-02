@@ -1,8 +1,4 @@
 """Laplacian kernel K = exp(-lambda * D) and lambda calibration strategies.
-
-calibrate_lam merges the 3 variants that used to live independently in
-wwl_benchmark.py ("1/mu" and "cv"), make_scenario_figures.py
-(calibrate_lam_fisher) and WWL_full_pipeline.py (calibrate_lambda, "1/mu" only).
 """
 
 import numpy as np
@@ -62,12 +58,12 @@ def calibrate_lam_and_C(D_train, y_train, C_grid, n_splits=3, seed=0, lam_grid=N
     """
     Jointly grid-search (lambda, C) via inner CV, instead of calibrating
     lambda first with C pinned at 1.0 (calibrate_lam's "cv" method) and only
-    then searching C with that lambda fixed — the two interact (a larger
+    then searching C with that lambda fixed, the two interact (a larger
     lambda makes K peakier, which shifts the SVM's effective margin and thus
     the optimal C), so a sequential search can miss the joint optimum.
 
     The (lambda, C) grid is embarrassingly parallel (each combo's inner-CV
-    score is independent of every other) — at N in the hundreds-to-thousands
+    score is independent of every other), at N in the hundreds-to-thousands
     this loop (default 15x9=135 combos x n_splits fits) dominates
     nested_cv_kernel's wall time far more than build_D, so it's parallelized
     the same way build_D is (joblib threads; libsvm's C core releases the

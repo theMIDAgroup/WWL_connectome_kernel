@@ -22,7 +22,7 @@ from .distances import build_D
 from .embedding import wl_embedding, wl_embedding_fractional
 from .kernels import build_K, calibrate_lam, calibrate_lam_and_C
 
-# half-decade steps (was 5 whole-decade points 0.01..100) — finer C selection
+# half-decade steps (was 5 whole-decade points 0.01..100), finer C selection
 # without changing the overall searched range
 C_GRID = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 100]
 ALPHA_GRID = [0.001, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 100]
@@ -43,7 +43,7 @@ def nested_cv_kernel(D, y, n_outer, n_inner, seed, lam_method="cv", return_diagn
         y_tr, y_te = y[tr], y[te]
 
         if lam_method == "cv":
-            # joint (lambda, C) grid search — see calibrate_lam_and_C docstring
+            # joint (lambda, C) grid search, see calibrate_lam_and_C docstring
             # for why this beats calibrating lambda first with C pinned at 1.0
             lam, best_C = calibrate_lam_and_C(D_tr, y_tr, C_grid, seed=seed, n_jobs=n_jobs)
         else:
@@ -104,7 +104,7 @@ def nested_cv_kernel_ordinal(D, y, n_outer, n_inner, seed, lam_method="cv", C_gr
     not a different kernel calibration.
 
     y must be integer labels 0..K-1, in increasing order of severity.
-    Returns (mean_bacc, std_bacc) — same shape as nested_cv_kernel.
+    Returns (mean_bacc, std_bacc), same shape as nested_cv_kernel.
     """
     classes = np.unique(y)
     K = len(classes)
@@ -148,7 +148,7 @@ def calibrate_lam_and_alpha_regression(D_train, y_train, alpha_grid=ALPHA_GRID,
     Regression analogue of kernels.calibrate_lam_and_C: joint grid search over
     (lambda for the Laplacian kernel, ridge alpha for KernelRidge) via inner
     CV, scored by negative MSE. Joint rather than sequential for the same
-    reason as the classification version — lambda's effect on kernel scale
+    reason as the classification version, lambda's effect on kernel scale
     interacts with the regularization strength that is optimal for it.
     """
     vals = D_train[np.triu_indices(len(D_train), k=1)]
@@ -187,7 +187,7 @@ def nested_cv_kernel_regression(D, y, n_outer, n_inner, seed, alpha_grid=ALPHA_G
     nested_cv_kernel calibrates (lambda, C).
 
     Returns a dict with out-of-fold y_true/y_pred plus overall R2, Pearson r
-    (and p), Spearman rho (and p) — Spearman is reported alongside Pearson
+    (and p), Spearman rho (and p), Spearman is reported alongside Pearson
     because several AMYPAD-PNHS biomarkers (Centiloidi, CSF ptau) are
     right-skewed, where a monotonic-but-nonlinear dose-response would show
     up in Spearman but be understated by R2/Pearson.
@@ -372,13 +372,13 @@ def select_best_h(FC, SC, y, h_values, n_outer, n_inner, seed, n_jobs=-1):
     the WL embeddings + W1 distance matrix, then run the SAME nested_cv_kernel
     (which already cross-validates lambda and C per outer fold) to get an
     honest nested-CV balanced accuracy estimate. H was previously a fixed
-    constant everywhere in the pipeline — this makes it a tuned hyperparameter
+    constant everywhere in the pipeline, this makes it a tuned hyperparameter
     like lambda/C already were.
 
     Embeddings depend only on each subject's own (FC, SC, H), never on labels
     or other subjects, so recomputing D per H introduces no leakage; the one
     caveat is the usual one for "pick the best of several honest CV
-    estimates" — comparing multiple H values has a mild optimistic selection
+    estimates", comparing multiple H values has a mild optimistic selection
     bias on top of (not instead of) each individual estimate being unbiased.
 
     FC, SC    : (S, N, N) arrays, one entry per subject
@@ -404,8 +404,8 @@ def select_best_h_alpha(FC, SC, y, h_values, alpha_values, n_outer, n_inner, see
     combination, recompute the WL embeddings with the regularized fractional
     structural propagation (embedding.wl_embedding_fractional, Filippo &
     Mazza 2026) instead of the direct structural adjacency, then score with
-    the same nested_cv_kernel used for select_best_h's plain-H results — same
-    classifier, same CV splits, same lambda/C calibration — so the two are
+    the same nested_cv_kernel used for select_best_h's plain-H results, same
+    classifier, same CV splits, same lambda/C calibration, so the two are
     directly comparable.
 
     alpha in (0, 1): smaller alpha -> more non-local (closer to the
@@ -435,7 +435,7 @@ def select_best_h_alpha(FC, SC, y, h_values, alpha_values, n_outer, n_inner, see
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# EXTERNAL-METHOD BASELINES — genuinely different classification approaches
+# EXTERNAL-METHOD BASELINES, genuinely different classification approaches
 # from the literature, not ablations of the WWL pipeline itself. Used to give
 # WWL an honest external comparison rather than only internal ablations.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -557,7 +557,7 @@ def nested_cv_shortest_path(FC, y, n_outer, n_inner, seed, n_bins=30, return_dia
                              C_grid=C_GRID, gamma_grid=("scale", "auto", 0.01, 0.1, 1.0)):
     """
     Shortest-path kernel baseline (Borgwardt & Kriegel 2005, histogram
-    simplification — see shortest_path_histograms): per-subject
+    simplification, see shortest_path_histograms): per-subject
     shortest-path-length histogram, classified via RBF-SVM (C and gamma
     grid search). A graph kernel mechanism genuinely different from WWL's
     WL-propagation + optimal-transport distance.

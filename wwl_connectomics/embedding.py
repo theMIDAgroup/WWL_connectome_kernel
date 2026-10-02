@@ -7,8 +7,8 @@ from .fractional import regularized_fractional_weight
 
 def wl_embedding(FC, DTI, H=2):
     """
-    FC  : (N, N) — each row is the node's initial attribute vector
-    DTI : (N, N) — edge weights used for propagation
+    FC  : (N, N), each row is the node's initial attribute vector
+    DTI : (N, N), edge weights used for propagation
     H   : number of WL iterations
     → (N, N*(H+1)) concatenated embedding
     """
@@ -38,14 +38,14 @@ def wl_embedding_fractional(FC, DTI, H=2, alpha=0.5, beta=1.0):
     every real structural edge keeps its own weight, and every other node
     pair gets a power-law-decaying long-range weight on top of it. This lets
     a single WL hop already reach non-adjacent regions through the
-    structural graph, rather than requiring H successive local hops — see
+    structural graph, rather than requiring H successive local hops, see
     fractional.regularized_fractional_weight for why the *regularized*
     variant (not the raw fractional graph) is used: it is the one Filippo &
     Mazza prove stays superdiffusive regardless of the subject's own
     algebraic connectivity.
 
-    FC    : (N, N) — each row is the node's initial attribute vector
-    DTI   : (N, N) — subject's structural (SC) weight matrix
+    FC    : (N, N), each row is the node's initial attribute vector
+    DTI   : (N, N), subject's structural (SC) weight matrix
     H     : number of WL iterations
     alpha : float in (0, 1), fractional order (0 -> most non-local, 1 -> local/DTI)
     beta  : float >= 1, non-local scaling (Filippo & Mazza Def. 4.1)

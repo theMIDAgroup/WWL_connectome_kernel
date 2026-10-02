@@ -1,9 +1,4 @@
-"""Classification-result figures and publication tables.
-
-plot_fold_accuracy_bars / plot_confusion_matrix / plot_lambda_c_per_fold split
-WWL_full_pipeline.py's 3-panel plot_svm_results into atomic functions, driven
-by the `diagnostics` dict crossval.nested_cv_kernel(..., return_diagnostics=True)
-now returns (so this logic isn't reimplemented a second time).
+"""Classification-result figures.
 """
 
 import os
@@ -206,42 +201,3 @@ def build_csv_table(all_results, save_path):
     df = pd.DataFrame(rows)
     df.to_csv(save_path, index=False)
     return df
-
-
-def build_latex_table(all_results, save_path):
-    """LaTeX table ready for paper insertion."""
-    lines = [
-        r"\begin{table}[ht]", r"\centering",
-        r"\caption{Balanced accuracy (mean $\pm$ std) across difficulty"
-        r" scenarios. $^{***}p<0.001$, $^{**}p<0.01$,"
-        r" $^*p<0.05$ (permutation test).}",
-        r"\label{tab:benchmark}", r"\small",
-    ]
-    methods = [m for m in METHOD_ORDER if m in all_results[0]["results"]]
-    col_fmt = "l" + "c" * len(methods) + "c"
-    lines.append(r"\begin{tabular}{" + col_fmt + r"}")
-    lines.append(r"\toprule")
-    header = "Scenario & " + " & ".join(
-        METHOD_LABELS.get(m, m).replace("\n", " ") for m in methods) + r" & $p$-val \\"
-    lines.append(header)
-    lines.append(r"\midrule")
-
-    for res in all_results:
-        scen = res["scenario"].capitalize()
-        p = res["p_val"]
-        stars = (r"$^{***}$" if p < 0.001 else r"$^{**}$" if p < 0.01
-                 else r"$^{*}$" if p < 0.05 else "n.s.")
-        cells = []
-        best = max(res["results"][m][0] for m in methods)
-        for m in methods:
-            mu, sd = res["results"][m]
-            cell = f"{mu:.3f} $\\pm$ {sd:.3f}"
-            if mu == best:
-                cell = r"\textbf{" + cell + "}"
-            cells.append(cell)
-        lines.append(f"{scen} & " + " & ".join(cells) + f" & {p:.4f}{stars} \\\\")
-
-    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    with open(save_path, "w") as f:
-        f.write("\n".join(lines))
-    return save_path

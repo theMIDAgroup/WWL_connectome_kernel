@@ -1,9 +1,5 @@
-"""N-group PCA comparison on flattened embeddings — generalizes the PCA panel
-that used to be duplicated across make_scenario_figure, make_comparison_figure
-and wwl_real_group_comparison.make_group_comparison_figure (each hardcoded to
-2 groups named CN/AD). For the intra/inter distance histogram counterpart see
-figures.distance_plots.plot_distance_intra_inter_hist — deliberately not
-reimplemented here to avoid the exact duplication this module set out to fix.
+"""N-group PCA comparison on flattened embeddings: for the intra/inter distance histogram counterpart see
+figures.distance_plots.plot_distance_intra_inter_hist.
 """
 
 import numpy as np
@@ -110,7 +106,7 @@ def plot_lda_projection(X, group_sizes, save_path, title=None, cv_splits=5, seed
 
     PCA shows the directions of maximum TOTAL variance, which in noisy
     high-dimensional embeddings are often dominated by per-subject noise
-    rather than the group signal — a classifier can separate groups well
+    rather than the group signal, a classifier can separate groups well
     even when the PCA plot looks flat. LDA instead finds the direction(s)
     that maximize between-group vs within-group variance directly from the
     labels, so it shows the separation a classifier actually uses.

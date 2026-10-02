@@ -1,9 +1,6 @@
 """
-Per-region embedding shift figures — the biggest source of duplication in the
-original codebase (wwl_benchmark.plot_population_shift, make_scenario_figures'
-copy of the same panels, and wwl_real_node_shift.plot_node_shift_ranking all
-reimplemented near-identical top-20/boxplot/scatter/significant-fraction
-panels). Each panel is now one atomic function operating on plain arrays, so
+Per-region embedding shift figures, the biggest source of duplication in the
+original codebase. Each panel is one atomic function operating on plain arrays, so
 a single canonical implementation is shared everywhere.
 
 Two families of functions here, matching the two ways "network" is
@@ -46,7 +43,7 @@ def _stars(p):
     return "***" if p < 0.001 else "**" if p < 0.01 else "*" if p < 0.05 else "n.s."
 
 
-# ── single-subject ───────────────────────────────────────────────────────────
+# single-subject
 def plot_embedding_shift_2d(emb, region_names, save_path, subject_label=None, h_iter=None):
     """2D PCA scatter of one subject's node attributes at iter 0 vs iter H, arrows = shift."""
     P = get_palette(); apply_style()
@@ -240,7 +237,7 @@ def plot_mean_shift_heatmap(shift_A, shift_B, networks, save_path, label_A="A", 
     return save_path
 
 
-# ── group-level (S subjects per group) ────────────────────────────────────────
+# group-level (S subjects per group)
 def plot_top_regions_shift(delta, significant, region_names, save_path,
                             label_0="group0", label_1="group1", top_n=20):
     """Top-N regions by |delta mean shift| between two groups, horizontal bars, FDR stars."""

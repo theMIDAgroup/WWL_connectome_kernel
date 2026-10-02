@@ -1,9 +1,4 @@
 """Structural/functional connectome graph layers and glass-brain figures.
-
-plot_structural_layer / plot_functional_layer generalize graphic_aux's old
-plot_multilayer (generic 2-color node split) and plot_multilayer_schaefer
-(7-network node coloring) into one pair of atomic, single-panel functions —
-both variants were previously always drawn side-by-side in one 2-panel figure.
 """
 
 import os
@@ -49,7 +44,7 @@ def _thresholded_graph(M, thr_percentile):
 def plot_structural_layer(DTI, pos, node_colors, save_path, region_names=None,
                            title="Structural layer (DTI)", thr_percentile=40,
                            edge_color=None, node_size=460, legend_handles=None):
-    """Single-panel structural (DTI) connectome graph — edge width/alpha ∝ weight."""
+    """Single-panel structural (DTI) connectome graph, edge width/alpha ∝ weight."""
     P = get_palette(); apply_style()
     edge_color = edge_color or P["BLUE"]
     N = DTI.shape[0]
@@ -91,7 +86,7 @@ def plot_functional_layer(FC, pos, node_colors, save_path, region_names=None,
                            title="Functional layer (fMRI)", thr_percentile=60,
                            edge_color=None, size_base=180, size_scale=820,
                            legend_handles=None, annotate_hubs=True):
-    """Single-panel functional (fMRI) connectome graph — node size ∝ FC strength."""
+    """Single-panel functional (fMRI) connectome graph, node size ∝ FC strength."""
     P = get_palette(); apply_style()
     edge_color = edge_color or P["TEAL"]
     N = FC.shape[0]
@@ -151,7 +146,7 @@ def plot_glass_brain(shift_vals, FC, save_path, networks, top_pct=20, display_mo
     sizes = 8 + (shift_vals - s_min) / (s_max - s_min + 1e-9) * 152
 
     # Symmetrize: FC may come in already row-normalized (e.g. zscore_subject),
-    # which breaks exact symmetry — nilearn then silently treats the matrix as
+    # which breaks exact symmetry, nilearn then silently treats the matrix as
     # a DIRECTED graph and draws large FancyArrow arrowheads instead of plain
     # undirected lines (and its arrow width/head_width ignore edge_kwargs).
     # FC edges are conceptually undirected here, so average with the
@@ -166,7 +161,7 @@ def plot_glass_brain(shift_vals, FC, save_path, networks, top_pct=20, display_mo
     conn_top = FC[np.ix_(mask, mask)].copy()
     np.fill_diagonal(conn_top, 0)
 
-    # keep only the strongest ~15% of edges among the top-shift nodes — without
+    # keep only the strongest ~15% of edges among the top-shift nodes, without
     # this plot_connectome draws every pair (up to N*(N-1)/2), unreadable.
     n_top = conn_top.shape[0]
     off_diag = conn_top[~np.eye(n_top, dtype=bool)]

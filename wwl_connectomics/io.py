@@ -165,7 +165,7 @@ def load_scenario(scenario_dir, perc, fc_norm="zscore_subject", dti_norm="minmax
     Load + preprocess one scenario directory, auto-detecting its layout:
 
       - legacy: one subfolder per group, each with its own SC_*.npy/FC_*.npy
-        (e.g. easy/CN/SC_*.npy, easy/AD/SC_*.npy) — group label = subfolder name.
+        (e.g. easy/CN/SC_*.npy, easy/AD/SC_*.npy), group label = subfolder name.
       - single-cohort: one SC_*.npy/FC_*.npy/metadata_*.csv per scenario, group
         label read from the `group_col` column of the metadata CSV.
 

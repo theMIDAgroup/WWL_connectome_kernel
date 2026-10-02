@@ -1,16 +1,8 @@
 """
 Convenience "report" wrappers that lay out several of the atomic figures.*
-panels into the classic combined multi-panel PNGs this project used to
+panels into a combined multi-panel PNGs this project used to
 produce by default (9-panel scenario figure, 4-panel population-shift
-figure, ...). Kept only for backward-compatible one-shot output — the
-default pipeline (wwl_benchmark.py) now calls the atomic figures.* functions
-directly instead, so most benchmark_results/ output is one-figure-per-PNG.
-
-Unlike figures.*, these draw multiple panels on one Figure inline (small
-amount of duplication vs. figures.* is accepted here, deliberately, in
-exchange for exact layout control) but always go through the shared
-statistics helpers (shifts.compute_region_shift_stats, kernels.calibrate_lam*,
-crossval.lambda_sensitivity_curve) rather than recomputing them.
+figure, ...).
 """
 
 import os
@@ -46,8 +38,7 @@ def _intra_inter(D, n_each):
 
 def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
                                   label_0="group0", label_1="group1"):
-    """4-panel population-level shift figure + CSV (replaces wwl_benchmark.plot_population_shift
-    and wwl_real_node_shift.plot_node_shift_ranking, which duplicated this exact layout)."""
+    """4-panel population-level shift figure + CSV ."""
     P = get_palette(); apply_style()
     region_names = atlas_df["region_name"].values
     rsn_ids = atlas_df["rsn_id"].values
@@ -64,11 +55,11 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
 
     fig = plt.figure(figsize=(18, 14))
     gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.40)
-    fig.suptitle(f"Population-level embedding shift — {name}  "
+    fig.suptitle(f"Population-level embedding shift, {name}  "
                  f"(N={shifts_0.shape[0]} {label_0}, {shifts_1.shape[0]} {label_1})",
                  fontsize=13, fontweight="bold", color=P["NAVY"])
 
-    # A — top-20 by |delta|
+    # A, top-20 by |delta|
     ax = fig.add_subplot(gs[:, 0])
     top20 = np.argsort(np.abs(delta))[::-1][:20]
     top20_names = [str(r).replace("7Networks_", "").replace("_", " ") for r in region_names[top20]]
@@ -82,14 +73,14 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
     ax.axvline(0, color=P["NAVY"], lw=0.8)
     ax.set_yticks(y_pos); ax.set_yticklabels(top20_names, fontsize=8)
     ax.set_xlabel(f"Δ mean shift ({label_1} − {label_0})", color=P["GRAY"])
-    ax.set_title("A — Top-20 regions by |Δ shift|  (* FDR p<0.05)", fontsize=10, color=P["NAVY"])
+    ax.set_title("A, Top-20 regions by |Δ shift|  (* FDR p<0.05)", fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
         mpatches.Patch(facecolor=P["CORAL"], label=f"Higher shift in {label_1}"),
         mpatches.Patch(facecolor=P["BLUE"], label=f"Higher shift in {label_0}"),
     ], fontsize=8, loc="lower right", framealpha=0.85)
 
-    # B — per-RSN violin
+    # B, per-RSN violin
     ax = fig.add_subplot(gs[0, 1:])
     width = 0.35
     for xi, rsn_id in enumerate(range(n_rsn)):
@@ -100,7 +91,7 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
         draw_violin(ax, d1, xi + width / 2, width * 0.9, P["CORAL"], "darkred")
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("Mean shift per RSN (subjects)")
-    ax.set_title(f"B — Per-RSN shift distribution: {label_0} vs {label_1}", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"B, Per-RSN shift distribution: {label_0} vs {label_1}", fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
         mpatches.Patch(facecolor=P["BLUE"], alpha=0.65, label=label_0),
@@ -108,7 +99,7 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
     ], fontsize=9, framealpha=0.85)
     ax.grid(axis="y", alpha=0.3)
 
-    # C — scatter mean shift
+    # C, scatter mean shift
     ax = fig.add_subplot(gs[1, 1])
     node_cols = [atlas_mod.REGION_COLOR.get(i, P["GRAY"]) for i in range(N)]
     ax.scatter(stats["mu_0"], stats["mu_1"], c=node_cols, s=35, alpha=0.75, edgecolors=P["WHITE"], lw=0.4)
@@ -121,13 +112,13 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
                     fontsize=6.5, color=P["NAVY"], xytext=(4, 4), textcoords="offset points")
     ax.set_xlabel(f"Mean shift {label_0}", color=P["GRAY"])
     ax.set_ylabel(f"Mean shift {label_1}", color=P["GRAY"])
-    ax.set_title(f"C — Region scatter (above diagonal = more shift in {label_1})",
+    ax.set_title(f"C, Region scatter (above diagonal = more shift in {label_1})",
                  fontsize=10, color=P["NAVY"])
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(alpha=0.25)
 
-    # D — % significant per RSN
+    # D, % significant per RSN
     ax = fig.add_subplot(gs[1, 2])
     sig_per_rsn = np.array([significant[rsn_ids == r].sum() for r in range(n_rsn)])
     total_per_rsn = np.array([(rsn_ids == r).sum() for r in range(n_rsn)])
@@ -139,7 +130,7 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
         ax.text(xi, f * 100 + 1, f"{s}/{t}", ha="center", fontsize=8, color=P["NAVY"])
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("% significant regions (FDR p<0.05)")
-    ax.set_title(f"D — Fraction sig. regions per RSN ({label_1} > {label_0})", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"D, Fraction sig. regions per RSN ({label_1} > {label_0})", fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False)
     ax.set_ylim(0, 110)
     ax.grid(axis="y", alpha=0.3)
@@ -152,7 +143,7 @@ def make_population_shift_report(name, shifts_0, shifts_1, atlas_df, out_dir,
 
 
 def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=None):
-    """4-panel distance/lambda figure (replaces wwl_benchmark.plot_distance_lambda)."""
+    """4-panel distance/lambda figure."""
     P = get_palette(); apply_style()
     S = len(y)
     intra_0, intra_1, inter = _intra_inter(D, n_each)
@@ -161,7 +152,7 @@ def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=
     stars = "***" if p_mw < 0.001 else "**" if p_mw < 0.01 else "*" if p_mw < 0.05 else "n.s."
 
     fig, axes = plt.subplots(1, 4, figsize=(18, 5))
-    fig.suptitle(f"Distance space analysis — {name}  (N={n_each}+{n_each})",
+    fig.suptitle(f"Distance space analysis, {name}  (N={n_each}+{n_each})",
                  fontsize=12, fontweight="bold", color=P["NAVY"])
 
     ax = axes[0]
@@ -169,7 +160,7 @@ def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=
     im = ax.imshow(D, cmap=cmap_d, aspect="auto")
     plt.colorbar(im, ax=ax, shrink=0.8, label="W1 distance")
     ax.axhline(n_each - 0.5, color=P["CORAL"], lw=1.5); ax.axvline(n_each - 0.5, color=P["CORAL"], lw=1.5)
-    ax.set_title("A — W1 distance matrix", fontsize=10, color=P["NAVY"])
+    ax.set_title("A, W1 distance matrix", fontsize=10, color=P["NAVY"])
     ax.set_xticks([]); ax.set_yticks([])
 
     ax = axes[1]
@@ -177,7 +168,7 @@ def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=
     for patch, c in zip(bp["boxes"], [P["BLUE"], P["CORAL"], P["GRAY"]]):
         patch.set_facecolor(c); patch.set_alpha(0.6)
     ax.set_ylabel("$W_1$ distance")
-    ax.set_title("B — Distance distributions by group", fontsize=10, color=P["NAVY"])
+    ax.set_title("B, Distance distributions by group", fontsize=10, color=P["NAVY"])
     ax.grid(True, alpha=0.25); ax.spines[["top", "right"]].set_visible(False)
 
     ax = axes[2]
@@ -189,7 +180,7 @@ def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=
         ax.hist(data, bins=bins, alpha=0.55, color=col, density=True, label=lbl)
         ax.axvline(np.mean(data), color=col, lw=1.8, linestyle="--")
     ax.set_xlabel("$W_1$ distance", fontsize=9); ax.legend(fontsize=8, framealpha=0.85)
-    ax.set_title(f"C — Distance distributions  {stars} (p={p_mw:.3f})", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"C, Distance distributions  {stars} (p={p_mw:.3f})", fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False); ax.grid(True, alpha=0.22)
 
     ax = axes[3]
@@ -202,7 +193,7 @@ def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=
     ax.axhline(0.5, color=P["LGRAY"], lw=1, linestyle=":")
     ax.fill_between(lam_grid, accs, 0.5, where=accs > 0.5, alpha=0.12, color=P["TEAL"])
     ax.set_xlabel("λ (log scale)", fontsize=9); ax.set_ylabel("Bal. accuracy (3-fold CV)", fontsize=9)
-    ax.set_title("D — λ sensitivity", fontsize=10, color=P["NAVY"])
+    ax.set_title("D, λ sensitivity", fontsize=10, color=P["NAVY"])
     ax.legend(fontsize=7.5, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False); ax.grid(True, alpha=0.22)
     ax.set_ylim(0.35, 1.05); ax.set_xlim(lam_grid[0], lam_grid[-1])
@@ -215,7 +206,7 @@ def make_distance_lambda_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=
 
 
 def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_emb=None):
-    """5-panel distance-matrix analysis figure (replaces wwl_benchmark.plot_distance_matrix_analysis)."""
+    """5-panel distance-matrix analysis figure"""
     P = get_palette(); apply_style()
     S = len(y)
     lam = 1.0 / (D[D > 0].mean() + 1e-9)
@@ -226,7 +217,7 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
 
     fig = plt.figure(figsize=(20, 8))
     gs = gridspec.GridSpec(2, 3, figure=fig, height_ratios=[1.0, 1.15], hspace=0.40, wspace=0.35)
-    fig.suptitle(f"Distance matrix analysis — {name}  (N={n_each}+{n_each}, λ={lam:.4f})",
+    fig.suptitle(f"Distance matrix analysis, {name}  (N={n_each}+{n_each}, λ={lam:.4f})",
                  fontsize=12, fontweight="bold", color=P["NAVY"])
 
     ax = fig.add_subplot(gs[0, 0])
@@ -234,7 +225,7 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
     im = ax.imshow(D, cmap=cmap_d, aspect="auto")
     plt.colorbar(im, ax=ax, shrink=0.8, label="W1 distance")
     ax.axhline(n_each - 0.5, color=P["CORAL"], lw=1.5); ax.axvline(n_each - 0.5, color=P["CORAL"], lw=1.5)
-    ax.set_title("A — W1 distance matrix", fontsize=9, color=P["NAVY"])
+    ax.set_title("A, W1 distance matrix", fontsize=9, color=P["NAVY"])
     ax.set_xlabel("Subject"); ax.set_ylabel("Subject")
 
     ax = fig.add_subplot(gs[0, 1])
@@ -242,7 +233,7 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
     im = ax.imshow(K, cmap=cmap_k, vmin=0, vmax=1, aspect="auto")
     plt.colorbar(im, ax=ax, shrink=0.8, label="kernel similarity")
     ax.axhline(n_each - 0.5, color=P["CORAL"], lw=1.5); ax.axvline(n_each - 0.5, color=P["CORAL"], lw=1.5)
-    ax.set_title(f"B — Kernel matrix (λ={lam:.3f})", fontsize=9, color=P["NAVY"])
+    ax.set_title(f"B, Kernel matrix (λ={lam:.3f})", fontsize=9, color=P["NAVY"])
     ax.set_xlabel("Subject"); ax.set_ylabel("Subject")
 
     ax = fig.add_subplot(gs[0, 2])
@@ -254,7 +245,7 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
         ax.hist(data, bins=bins, alpha=0.55, color=col, density=True, label=lbl)
         ax.axvline(np.mean(data), color=col, lw=1.8, linestyle="--")
     ax.set_xlabel("W1 distance"); ax.set_ylabel("Density"); ax.legend(fontsize=7.5, framealpha=0.85)
-    ax.set_title(f"C — Distance distributions | MW intra<inter: {stars} (p={p_mw:.4f})",
+    ax.set_title(f"C, Distance distributions | MW intra<inter: {stars} (p={p_mw:.4f})",
                  fontsize=9, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False)
 
@@ -271,7 +262,7 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
     sep_r = np.linalg.norm(c0 - c1) / (sp + 1e-9)
     ax.set_xlabel(f"PC1 ({ev_e[0]*100:.1f}%)"); ax.set_ylabel(f"PC2 ({ev_e[1]*100:.1f}%)")
     ax.legend(fontsize=9, framealpha=0.85)
-    ax.set_title(f"D — PCA of joint embeddings  (sep={sep_r:.2f})", fontsize=9, color=P["NAVY"])
+    ax.set_title(f"D, PCA of joint embeddings  (sep={sep_r:.2f})", fontsize=9, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False); ax.grid(True, alpha=0.3)
 
     ax = fig.add_subplot(gs[1, 2:])
@@ -298,7 +289,7 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
             color = (P["NAVY"] if ri == 0 else P["BLUE"] if ri == 1 else P["CORAL"] if ri == 2 else P["GRAY"])
             ax.text(x_pos, 1 - ri * 0.13, cell, transform=ax.transAxes,
                     fontsize=9.5, fontweight=weight, color=color, va="top")
-    ax.set_title("E — Distance statistics", fontsize=9, color=P["NAVY"])
+    ax.set_title("E, Distance statistics", fontsize=9, color=P["NAVY"])
 
     fig.tight_layout()
     save_path = os.path.join(out_dir, f"{name}_distance_analysis.png")
@@ -308,12 +299,12 @@ def make_distance_analysis_report(name, D, y, n_each, out_dir, Z_emb=None, ev_em
 
 
 def report_accuracy_comparison(all_results, save_path):
-    """Multi-scenario accuracy grid (replaces wwl_benchmark.plot_accuracy_comparison)."""
+    """Multi-scenario accuracy grid."""
     P = get_palette(); apply_style()
     n_scen = len(all_results)
     fig, axes = plt.subplots(1, n_scen, figsize=(4.5 * n_scen, 5.5), sharey=True)
     if n_scen == 1: axes = [axes]
-    fig.suptitle("Balanced accuracy — WWL vs baselines", fontsize=13, fontweight="bold",
+    fig.suptitle("Balanced accuracy, WWL vs baselines", fontsize=13, fontweight="bold",
                  color=P["NAVY"], y=1.02)
     palette_cycle = [P["BLUE"], P["TEAL"], P["AMBER"], P["CORAL"], P["GRAY"], P["VIOLET"], P["GREEN"]]
 
@@ -347,7 +338,7 @@ def report_accuracy_comparison(all_results, save_path):
 
 def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, atlas_df, out_dir,
                           label_0="group0", label_1="group1"):
-    """9-panel per-scenario master figure (replaces make_scenario_figures.make_scenario_figure)."""
+    """9-panel per-scenario master figure."""
     P = get_palette(); apply_style()
     S = 2 * n_each
     region_names = atlas_df["region_name"].values
@@ -365,7 +356,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
     delta, significant = stats["delta"], stats["significant"]
 
     fig = plt.figure(figsize=(20, 18))
-    fig.suptitle(f"WWL connectome kernel — scenario: {name.upper()}  (N={n_each}+{n_each})",
+    fig.suptitle(f"WWL connectome kernel, scenario: {name.upper()}  (N={n_each}+{n_each})",
                  fontsize=14, fontweight="bold", color=P["NAVY"], y=0.99)
     gs = gridspec.GridSpec(3, 3, figure=fig, hspace=0.45, wspace=0.35,
                            top=0.95, bottom=0.04, left=0.06, right=0.97)
@@ -376,14 +367,14 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
         ev = PCA(n_components=2).fit(X).explained_variance_ratio_
         ax.scatter(Z[:, 0], Z[:, 1], s=35, c=col, alpha=0.75, edgecolors="white", linewidth=0.35)
         ax.set_xlabel(f"PC1 ({100*ev[0]:.1f}%)"); ax.set_ylabel(f"PC2 ({100*ev[1]:.1f}%)")
-        ax.set_title(f"{tag} — PCA of {lbl} subjects")
+        ax.set_title(f"{tag}, PCA of {lbl} subjects")
 
     cmap_d = LinearSegmentedColormap.from_list("d", [P["WHITE"], P["LBLUE"], P["NAVY"]])
     ax = fig.add_subplot(gs[0, 2])
     im = ax.imshow(D, cmap=cmap_d, aspect="auto")
     plt.colorbar(im, ax=ax, shrink=0.82, label="$W_1$ distance")
     ax.axhline(n_each - 0.5, color=P["CORAL"], lw=1.5); ax.axvline(n_each - 0.5, color=P["CORAL"], lw=1.5)
-    ax.set_title("C — $W_1$ distance matrix\n(all subjects)", fontsize=10, color=P["NAVY"])
+    ax.set_title("C, $W_1$ distance matrix\n(all subjects)", fontsize=10, color=P["NAVY"])
     ax.set_xticks([]); ax.set_yticks([])
 
     ax = fig.add_subplot(gs[1, 0])
@@ -396,7 +387,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
         ax.axvline(np.mean(data), color=col, lw=2, linestyle="--")
     ax.set_xlabel("$W_1$ distance", fontsize=9); ax.set_ylabel("Density", fontsize=9)
     ax.legend(fontsize=8.5, framealpha=0.88)
-    ax.set_title(f"D — Distance distributions\nMann-Whitney intra<inter: {stars} (p={p_mw:.3f})",
+    ax.set_title(f"D, Distance distributions\nMann-Whitney intra<inter: {stars} (p={p_mw:.3f})",
                  fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False); ax.grid(True, alpha=0.22)
 
@@ -409,7 +400,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
     ax.axvline(n_each - 0.5, color="white", linestyle="--", linewidth=1, alpha=0.7)
     ax.set_xticks([n_each // 2, n_each + n_each // 2]); ax.set_xticklabels([label_0, label_1], fontsize=8, fontweight="bold")
     ax.set_yticks([n_each // 2, n_each + n_each // 2]); ax.set_yticklabels([label_0, label_1], fontsize=8, fontweight="bold")
-    ax.set_title("E — WWL Kernel Matrix (Similarity)", fontsize=10, fontweight="bold", color=P["NAVY"])
+    ax.set_title("E, WWL Kernel Matrix (Similarity)", fontsize=10, fontweight="bold", color=P["NAVY"])
 
     ax = axes[5]
     X_joint = np.vstack([X0, X1])
@@ -423,7 +414,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
     sp = np.sqrt((Z_j[:n_each].var(0).mean() + Z_j[n_each:].var(0).mean()) / 2)
     sep = np.linalg.norm(c0 - c1) / (sp + 1e-9)
     ax.set_xlabel(f"PC1 ({ev_j[0]*100:.1f}%)", fontsize=9); ax.set_ylabel(f"PC2 ({ev_j[1]*100:.1f}%)", fontsize=9)
-    ax.set_title(f"F — PCA joint embedding space\nsep={sep:.2f}", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"F, PCA joint embedding space\nsep={sep:.2f}", fontsize=10, color=P["NAVY"])
     ax.legend(fontsize=9, framealpha=0.85); ax.spines[["top", "right"]].set_visible(False); ax.grid(True, alpha=0.22)
 
     ax = axes[6]
@@ -439,7 +430,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
     ax.axvline(0, color=P["NAVY"], lw=0.8)
     ax.set_yticks(y_pos); ax.set_yticklabels(top20_n, fontsize=7.5)
     ax.set_xlabel(f"Δ mean shift ({label_1} − {label_0})", fontsize=9)
-    ax.set_title("G — Top-20 regions by |Δδ|\n(* FDR q<0.05)", fontsize=10, color=P["NAVY"])
+    ax.set_title("G, Top-20 regions by |Δδ|\n(* FDR q<0.05)", fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[mpatches.Patch(facecolor=P["CORAL"], label=f"Higher shift in {label_1}"),
                         mpatches.Patch(facecolor=P["BLUE"], label=f"Higher shift in {label_0}")],
@@ -454,7 +445,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
             draw_violin(ax, data, xi + off, width * 0.9, col, mc)
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=8.5)
     ax.set_ylabel("Mean shift per RSN (subjects)", fontsize=9)
-    ax.set_title(f"H — Embedding shift per RSN\n({label_0} blue, {label_1} orange)", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"H, Embedding shift per RSN\n({label_0} blue, {label_1} orange)", fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False); ax.grid(axis="y", alpha=0.28)
     ax.legend(handles=[mpatches.Patch(facecolor=P["BLUE"], alpha=0.65, label=label_0),
                         mpatches.Patch(facecolor=P["CORAL"], alpha=0.65, label=label_1)],
@@ -472,8 +463,8 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
                     fontsize=7, color=P["NAVY"], xytext=(5, 4), textcoords="offset points", fontweight="bold")
     ax.legend(handles=atlas_mod.legend_handles(), fontsize=7, framealpha=0.85, ncol=2,
               title="RSN", title_fontsize=7.5)
-    ax.set_xlabel(f"Mean shift — {label_0}", fontsize=9); ax.set_ylabel(f"Mean shift — {label_1}", fontsize=9)
-    ax.set_title(f"I — Region-level shift: {label_0} vs {label_1}\n(above diagonal = more shift in {label_1})",
+    ax.set_xlabel(f"Mean shift, {label_0}", fontsize=9); ax.set_ylabel(f"Mean shift, {label_1}", fontsize=9)
+    ax.set_title(f"I, Region-level shift: {label_0} vs {label_1}\n(above diagonal = more shift in {label_1})",
                  fontsize=10, color=P["NAVY"])
     ax.spines[["top", "right"]].set_visible(False); ax.grid(True, alpha=0.22)
 
@@ -486,7 +477,7 @@ def make_scenario_report(name, embs_0, embs_1, D, n_each, shifts_0, shifts_1, at
 
 def make_comparison_report(scenario_data, out_dir, scenario_labels=None):
     """
-    2-row multi-scenario comparison figure (replaces make_scenario_figures.make_comparison_figure).
+    2-row multi-scenario comparison figure.
     scenario_data: {scenario_name: {"D":..., "n_each":..., "X_cn":..., "X_ad":...}} (X_cn/X_ad =
     flattened embeddings for the two groups, kept as X_cn/X_ad for call-site compatibility).
     """
@@ -496,7 +487,7 @@ def make_comparison_report(scenario_data, out_dir, scenario_labels=None):
     fig, axes = plt.subplots(2, n_scen, figsize=(5 * n_scen, 10))
     if n_scen == 1:
         axes = axes.reshape(2, 1)
-    fig.suptitle("Multi-scenario comparison — WWL kernel", fontsize=13, fontweight="bold",
+    fig.suptitle("Multi-scenario comparison, WWL kernel", fontsize=13, fontweight="bold",
                  color=P["NAVY"], y=1.01)
     scenario_labels = scenario_labels or {}
 
@@ -540,12 +531,12 @@ def make_comparison_report(scenario_data, out_dir, scenario_labels=None):
 
 
 def report_permutation_grid(all_results, save_path):
-    """Multi-scenario permutation-null grid (replaces wwl_benchmark.plot_permutation)."""
+    """Multi-scenario permutation-null grid."""
     P = get_palette(); apply_style()
     n = len(all_results)
     fig, axes = plt.subplots(1, n, figsize=(4.5 * n, 4.5))
     if n == 1: axes = [axes]
-    fig.suptitle("Permutation test — WWL kernel", fontsize=13, fontweight="bold", color=P["NAVY"], y=1.02)
+    fig.suptitle("Permutation test, WWL kernel", fontsize=13, fontweight="bold", color=P["NAVY"], y=1.02)
 
     for ax, res in zip(axes, all_results):
         null = res["null_dist"]; obs = res["results"]["WWL"][0]; p = res["p_val"]

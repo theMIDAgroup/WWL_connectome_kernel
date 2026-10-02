@@ -1,8 +1,6 @@
 """Wasserstein distances between node embeddings and the pairwise distance matrix builder.
 
-build_D is the single canonical (parallel) implementation — it used to be
-reimplemented 3 times (wwl_benchmark.py, make_scenario_figures.py non-parallel,
-WWL_full_pipeline.py under the name build_distance_matrix).
+build_D is the single canonical (parallel) implementation of the pairwise Wasserstein-1 distance matrix over a list of embeddings.
 """
 
 import numpy as np
@@ -22,7 +20,7 @@ def wasserstein_1(X1, X2):
 def wasserstein_2(X1, X2):
     """
     Optimal transport plan via Linear Programming (scipy HiGHS).
-    Cost = sqrt(sum weights * distances^2) — penalizes long-range transport.
+    Cost = sqrt(sum weights * distances^2), penalizes long-range transport.
 
     Key difference vs W1: W1 is a rigid 1-to-1 matching, indifferent to
     distribution shape; W2 is fractional transport, sensitive to the spread

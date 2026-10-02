@@ -1,8 +1,4 @@
 """Distance-matrix and intra/inter-group distance distribution figures.
-
-distance_groups is a plain {name: list_of_floats} dict throughout — callers
-build it however fits their comparison (2 groups, CN/AD intra split, N-group
-real-data targets, ...) rather than each figure re-deriving intra/inter itself.
 """
 
 import numpy as np

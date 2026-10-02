@@ -1,4 +1,4 @@
-"""Kernel-matrix and (kernel-)PCA figures — each function saves exactly one PNG."""
+"""Kernel-matrix and (kernel-)PCA figures, each function saves exactly one PNG."""
 
 import os
 
@@ -23,7 +23,7 @@ def plot_kernel_matrix(K, save_path, sample_labels=None, group_sizes=None, annot
     max_labelled_samples : above this sample count, per-sample tick labels and
                     per-cell value annotations are skipped (both become
                     unreadable clutter that hides the heatmap itself well
-                    before S reaches a few hundred) — group boundaries from
+                    before S reaches a few hundred), group boundaries from
                     group_sizes remain the primary way to read the matrix.
     """
     P = get_palette(); apply_style()
@@ -114,8 +114,7 @@ def plot_kernel_pca(Z, group_labels, save_path, group_colors=None, sample_names=
 
 def plot_kernel_pca_colored(Z, values, col_name, save_path):
     """
-    2D (kernel-)PCA scatter colored by an arbitrary variable (numeric -> viridis
-    colorbar, categorical -> tab10/20 legend), missing values shown in light gray.
+    2D (kernel-)PCA scatter colored by an arbitrary variable, missing values shown in light gray.
     """
     apply_style()
     is_missing = pd.isna(values) if not isinstance(values[0], str) else pd.Series(values).isna().values
