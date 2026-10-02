@@ -26,7 +26,9 @@ def calibrate_lam(D_train, y_train=None, method="cv", lam_grid=None, n_splits=3,
     Calibrate lambda for the Laplacian kernel K = exp(-lambda * D).
 
     method="1/mu" : lambda = 1 / mean(D_train)  [fast, no labels needed]
+
     method="cv"   : lambda chosen by n_splits-fold CV on training distances [better]
+
     lam_grid      : candidate lambdas for method="cv" (default: 30 points
                     log-spaced over [lam_mu*0.05, lam_mu*50]).
     """

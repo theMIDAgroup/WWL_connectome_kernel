@@ -1,4 +1,4 @@
-"""Per-subject, per-region embedding shift (||a^H(r) - a^0(r)||) and group statistics.
+"""Per-subject, per-region embedding shift (``||a^H(r) - a^0(r)||``) and group statistics.
 """
 
 import numpy as np
@@ -7,7 +7,7 @@ from scipy.stats import mannwhitneyu
 
 
 def compute_shifts(embs, N):
-    """shift[i, r] = ||a^H(r) - a^0(r)|| for subject i, region r. embs: list of (N, N*(H+1))."""
+    """``shift[i, r] = ||a^H(r) - a^0(r)||`` for subject i, region r. embs: list of (N, N*(H+1))."""
     return np.array([
         np.linalg.norm(e[:, -N:] - e[:, :N], axis=1)
         for e in embs
@@ -44,7 +44,7 @@ def compute_region_shift_stats(shifts_0, shifts_1, alpha=0.05):
 
 
 def region_shift_dataframe(stats, region_names, rsn_labels=None, label_0="group0", label_1="group1"):
-    """Tidy DataFrame from compute_region_shift_stats output, sorted by |delta| desc... actually delta desc."""
+    """Tidy DataFrame from compute_region_shift_stats output, sorted by ``|delta|`` desc... actually delta desc."""
     data = {
         "region": region_names,
         f"mean_shift_{label_0}": stats["mu_0"],

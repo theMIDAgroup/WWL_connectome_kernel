@@ -413,10 +413,14 @@ def select_best_h_alpha(FC, SC, y, h_values, alpha_values, n_outer, n_inner, see
     propagation (Filippo & Mazza, Lemma 3.2), i.e. select_best_h's embedding.
 
     FC, SC       : (S, N, N) arrays, one entry per subject
+
     h_values     : iterable of int
+
     alpha_values : iterable of float in (0, 1)
+
     beta         : float >= 1, non-local scaling shared by all combinations
                    (Filippo & Mazza Def. 4.1)
+
 
     Returns (results, best) where results = {(h, alpha): {"mean_bacc",
     "std_bacc", "D", "embs"}} and best is the best-scoring (h, alpha) key.
@@ -442,10 +446,12 @@ def select_best_h_alpha(FC, SC, y, h_values, alpha_values, n_outer, n_inner, see
 def graph_theory_features(FC, rsn_ids):
     """
     Classic network-neuroscience feature set per subject, extracted from FC:
+
       - node strength (weighted degree, off-diagonal sum)            (N features)
       - weighted clustering coefficient (Onnela et al. 2005)         (N features)
       - modularity Q (Newman), using the KNOWN RSN partition          (1 feature)
       - density (fraction of nonzero edges)                          (1 feature)
+
     Fully vectorized (no networkx), fast enough for N~100 region graphs
     across hundreds of subjects. Returns (S, 2N+2).
     """
@@ -524,7 +530,7 @@ def nested_cv_graphtheory(FC, y, rsn_ids, n_outer, n_inner, seed, return_diagnos
 def shortest_path_histograms(FC, n_bins=30, eps=1e-6):
     """
     Per-subject histogram of all-pairs shortest-path lengths on a weighted
-    graph built from FC (distance = 1/|correlation|, so strongly connected
+    graph built from FC (distance = ``1/|correlation|``, so strongly connected
     region pairs are "close"). Tractable histogram simplification of the
     Borgwardt & Kriegel (2005) shortest-path kernel: the full pairwise
     edge-length matching kernel is O(N^4) per graph PAIR, infeasible at

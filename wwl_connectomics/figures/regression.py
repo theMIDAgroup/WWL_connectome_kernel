@@ -74,8 +74,8 @@ def plot_regions_scatter_grid(shift, y, region_names, save_path, top_n=12,
     Grid (small multiples) of scatter shift-region vs target, one per
     region, with OLS line and r/p per panel, single PNG.
 
-    ranked_idx : indices of regions to show, in order (e.g., by |r|
-                 decreasing); if None, calculated here from zero via |pearson r|.
+    ranked_idx : indices of regions to show, in order (e.g., by ``|r|``
+                 decreasing); if None, calculated here from zero via ``|pearson r|``.
     """
     P = get_palette(); apply_style()
     shift = np.asarray(shift, dtype=float); y = np.asarray(y, dtype=float)
@@ -115,7 +115,7 @@ def plot_regions_scatter_grid(shift, y, region_names, save_path, top_n=12,
 
 def plot_region_importance_bar(coefs, region_names, save_path, top_n=20,
                                 title="Top regions by |coefficient|", xlabel="Coefficient"):
-    """Top-N regions by |coefs| (e.g. standardized linear-SVR weights), horizontal bars."""
+    """Top-N regions by ``|coefs|`` (e.g. standardized linear-SVR weights), horizontal bars."""
     P = get_palette(); apply_style()
     coefs = np.asarray(coefs)
     top_n = min(top_n, len(coefs))

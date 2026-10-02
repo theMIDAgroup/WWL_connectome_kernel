@@ -11,3 +11,6 @@ examples/quickstart_out/
 
 # OS
 .DS_Store
+
+# Sphinx
+docs/_build/

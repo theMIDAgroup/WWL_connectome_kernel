@@ -15,7 +15,7 @@ from . import (
 )
 
 from .classification import (
-    build_csv_table, build_latex_table, plot_accuracy_bars,
+    build_csv_table, plot_accuracy_bars,
     plot_confusion_matrix, plot_fold_accuracy_bars, plot_h_selection,
     plot_lambda_c_per_fold, plot_permutation_null,
 )
@@ -47,7 +47,7 @@ from .transport import aggregate_to_networks, plot_ground_distance, plot_transpo
 __all__ = [
     "classification", "connectome_graphs", "distance_plots", "group_comparison",
     "kernel_space", "node_shift", "regression", "transport",
-    "build_csv_table", "build_latex_table", "plot_accuracy_bars",
+    "build_csv_table", "plot_accuracy_bars",
     "plot_confusion_matrix", "plot_fold_accuracy_bars", "plot_h_selection",
     "plot_lambda_c_per_fold", "plot_permutation_null",
     "compute_spring_layout", "plot_functional_layer", "plot_glass_brain",

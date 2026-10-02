@@ -5,6 +5,7 @@ a single canonical implementation is shared everywhere.
 
 Two families of functions here, matching the two ways "network" is
 represented in this codebase:
+
   - subject-pair functions (plot_shift_comparison_subject,
     plot_shift_distribution_by_network, plot_mean_shift_heatmap) take the
     `networks` dict-of-index-ranges format (atlas.NETWORKS) and compare two
@@ -240,7 +241,7 @@ def plot_mean_shift_heatmap(shift_A, shift_B, networks, save_path, label_A="A", 
 # group-level (S subjects per group)
 def plot_top_regions_shift(delta, significant, region_names, save_path,
                             label_0="group0", label_1="group1", top_n=20):
-    """Top-N regions by |delta mean shift| between two groups, horizontal bars, FDR stars."""
+    """Top-N regions by ``|delta mean shift|`` between two groups, horizontal bars, FDR stars."""
     P = get_palette(); apply_style()
     top_idx = np.argsort(np.abs(delta))[::-1][:top_n]
     top_delta = delta[top_idx]

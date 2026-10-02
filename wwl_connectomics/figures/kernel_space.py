@@ -18,8 +18,10 @@ def plot_kernel_matrix(K, save_path, sample_labels=None, group_sizes=None, annot
     Heatmap of a kernel (or similarity) matrix.
 
     sample_labels : optional per-sample short tag shown under each tick (e.g. group).
+
     group_sizes   : optional OrderedDict/dict name->n (in sample order) to draw
                     dashed amber blocks + labels around the intra-group blocks.
+
     max_labelled_samples : above this sample count, per-sample tick labels and
                     per-cell value annotations are skipped (both become
                     unreadable clutter that hides the heatmap itself well
