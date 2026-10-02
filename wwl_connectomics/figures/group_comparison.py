@@ -88,8 +88,7 @@ def plot_group_pca(X, group_sizes, save_path, title=None, seed=42, confidence=0.
 
     ax.set_xlabel(f"PC1 ({ev[0]*100:.1f}%)", fontsize=9)
     ax.set_ylabel(f"PC2 ({ev[1]*100:.1f}%)", fontsize=9)
-    ax.set_title((title or "PCA of embeddings") + title_extra, fontsize=10,
-                 color=P["NAVY"], fontweight="bold")
+    ax.set_title((title or "PCA of embeddings") + title_extra, fontsize=10, fontweight="bold")
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(True, alpha=0.22)
@@ -168,8 +167,8 @@ def plot_lda_projection(X, group_sizes, save_path, title=None, cv_splits=5, seed
         ax.grid(True, alpha=0.22)
 
     ax.set_title(f"{title or 'LDA of embeddings'}\n"
-                 f"5-fold CV balanced accuracy = {cv_acc:.3f}",
-                 fontsize=10, color=P["NAVY"], fontweight="bold")
+                 f"5 fold CV balanced accuracy = {cv_acc:.3f}",
+                 fontsize=10, fontweight="bold")
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
 

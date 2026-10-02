@@ -18,12 +18,16 @@ def _stars(p):
 
 
 def plot_accuracy_bars(results, save_path, p_val=None, chance=0.5, title="Balanced accuracy",
-                        ylim=(0.3, 1.12), p_vals=None):
+                        ylim=None, p_vals=None):
     """results: {method: (mean, std)}. If method names match METHOD_ORDER they're sorted/labeled accordingly.
 
     p_vals: optional {method: p_value} to star multiple bars individually
     (methods not in p_vals get no star). Takes precedence over p_val, which
-    only ever stars bar 0 (kept for backward compatibility)."""
+    only ever stars bar 0 (kept for backward compatibility).
+
+    ylim: (bottom, top); by default the bottom is 0.3 and the top leaves just
+    enough room above the tallest error bar for the significance stars and
+    the legend, which sits in the upper right corner."""
     P = get_palette(); apply_style()
     methods = [m for m in METHOD_ORDER if m in results] or list(results.keys())
     labels = [METHOD_LABELS.get(m, m) for m in methods]
@@ -43,18 +47,20 @@ def plot_accuracy_bars(results, save_path, p_val=None, chance=0.5, title="Balanc
         for i, m in enumerate(methods):
             if m in p_vals:
                 ax.text(i, mus[i] + sds[i] + 0.02, _stars(p_vals[m]), ha="center", va="bottom",
-                        fontsize=15, color=P["NAVY"], fontweight="bold")
+                        fontsize=15, color="black", fontweight="bold")
     elif p_val is not None:
         ax.text(0, mus[0] + sds[0] + 0.02, _stars(p_val), ha="center", va="bottom",
-                fontsize=15, color=P["NAVY"], fontweight="bold")
+                fontsize=15, color="black", fontweight="bold")
     ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=12)
+    if ylim is None:
+        ylim = (0.3, max(m + sd for m, sd in zip(mus, sds)) + 0.12)
     ax.set_ylim(*ylim)
-    ax.set_title(title, fontsize=15, color=P["NAVY"], fontweight="bold")
+    ax.set_title(title, fontsize=15, fontweight="bold")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", alpha=0.3)
-    ax.set_ylabel("Balanced accuracy", color=P["GRAY"], fontsize=13)
+    ax.set_ylabel("Balanced accuracy", fontsize=13)
     ax.tick_params(axis="y", labelsize=11)
-    ax.legend(fontsize=11, framealpha=0.7, loc="lower right")
+    ax.legend(fontsize=11, framealpha=0.7, loc="upper right")
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])
     plt.close(fig)
@@ -81,9 +87,9 @@ def plot_h_selection(results, save_path, chance=0.5, best_h=None, title="WL dept
     bars[best_idx].set_edgecolor(P["NAVY"]); bars[best_idx].set_linewidth(2.5)
     bars[best_idx].set_facecolor(P["BLUE"])
     ax.axhline(chance, color=P["GRAY"], lw=1.2, linestyle=":", label=f"Chance ({chance:.3g})")
-    ax.set_xlabel("H (WL propagation iterations)", color=P["GRAY"])
-    ax.set_ylabel("Balanced accuracy (nested CV)", color=P["GRAY"])
-    ax.set_title(f"{title}\nbest H = {best_h}", fontsize=10, color=P["NAVY"], fontweight="bold")
+    ax.set_xlabel("H (WL propagation iterations)")
+    ax.set_ylabel("Balanced accuracy (nested CV)")
+    ax.set_title(f"{title}\nbest H = {best_h}", fontsize=10, fontweight="bold")
     ax.legend(fontsize=8, framealpha=0.7, loc="lower right")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", alpha=0.3)
@@ -102,9 +108,9 @@ def plot_permutation_null(null_dist, observed, p_val, save_path, title="Permutat
     ax.axvline(observed, color=P["BLUE"], lw=2.5, label=f"Observed={observed:.3f}")
     ax.axvline(np.percentile(null_dist, 95), color=P["CORAL"], lw=1.5, linestyle="--",
                label="95th pct (null)")
-    ax.set_title(f"{title}  p={p_val:.4f} {_stars(p_val)}", fontsize=10, color=P["NAVY"])
-    ax.set_xlabel("Balanced accuracy (permuted)", color=P["GRAY"])
-    ax.set_ylabel("Density", color=P["GRAY"])
+    ax.set_title(f"{title}  p={p_val:.4f} {_stars(p_val)}", fontsize=10)
+    ax.set_xlabel("Balanced accuracy (permuted)")
+    ax.set_ylabel("Density")
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(alpha=0.3)
@@ -126,7 +132,7 @@ def plot_fold_accuracy_bars(per_fold_df, mean_acc, mean_bacc, save_path):
     ax.axhline(0.5, color=P["GRAY"], lw=1, linestyle=":")
     ax.set_ylim(0, 1.05); ax.set_xticks(x)
     ax.set_xlabel("Fold"); ax.set_ylabel("Score")
-    ax.set_title("Per-fold scores", fontsize=10, color=P["NAVY"])
+    ax.set_title("Per fold scores", fontsize=10)
     ax.legend(fontsize=7.5, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
@@ -151,7 +157,7 @@ def plot_confusion_matrix(cm, class_names, save_path):
     ax.set_xticks(range(len(class_names))); ax.set_xticklabels(class_names, fontsize=9)
     ax.set_yticks(range(len(class_names))); ax.set_yticklabels(class_names, fontsize=9)
     ax.set_xlabel("Predicted"); ax.set_ylabel("True")
-    ax.set_title("Confusion matrix (aggregate)", fontsize=10, color=P["NAVY"])
+    ax.set_title("Confusion matrix (aggregate)", fontsize=10)
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])
     plt.close(fig)
@@ -174,7 +180,7 @@ def plot_lambda_c_per_fold(per_fold_df, save_path):
     lines1, lbl1 = ax.get_legend_handles_labels()
     lines2, lbl2 = ax2.get_legend_handles_labels()
     ax.legend(lines1 + lines2, lbl1 + lbl2, fontsize=8, framealpha=0.85)
-    ax.set_title("λ and C per fold", fontsize=10, color=P["NAVY"])
+    ax.set_title("λ and C per fold", fontsize=10)
     ax.spines[["top"]].set_visible(False); ax2.spines[["top"]].set_visible(False)
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])

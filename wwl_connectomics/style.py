@@ -27,9 +27,10 @@ def apply_style():
     P = get_palette()
     plt.rcParams.update({
         "figure.facecolor": P["WHITE"], "axes.facecolor": P["WHITE"],
-        "axes.edgecolor":   P["LGRAY"], "axes.labelcolor": P["NAVY"],
-        "xtick.color":      P["GRAY"],  "ytick.color":     P["GRAY"],
-        "text.color":       P["NAVY"],  "grid.color":      P["LGRAY"],
+        "axes.edgecolor":   P["LGRAY"], "axes.labelcolor": "black",
+        "xtick.color":      "black",    "ytick.color":     "black",
+        "text.color":       "black",     "grid.color":      P["LGRAY"],
+        "axes.titlecolor":  "black",
         "grid.linewidth":   0.5,        "font.size":       10,
     })
 

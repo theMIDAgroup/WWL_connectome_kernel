@@ -51,7 +51,7 @@ def plot_structural_layer(DTI, pos, node_colors, save_path, region_names=None,
     G = _thresholded_graph(DTI, thr_percentile)
 
     fig, ax = plt.subplots(figsize=(6.5, 5.8))
-    ax.set_title(title, fontsize=10, color=edge_color, pad=8)
+    ax.set_title(title, fontsize=10, pad=8)
     ax.set_aspect("equal"); ax.axis("off")
 
     for u, v, d in G.edges(data=True):
@@ -70,7 +70,7 @@ def plot_structural_layer(DTI, pos, node_colors, save_path, region_names=None,
     n_e = G.number_of_edges()
     mean_w = np.mean([d["weight"] for _, _, d in G.edges(data=True)]) if n_e else 0
     ax.text(0.02, 0.02, f"edges: {n_e}  |  mean weight: {mean_w:.2f}",
-            transform=ax.transAxes, fontsize=7.5, color=P["GRAY"], va="bottom")
+            transform=ax.transAxes, fontsize=7.5, color="black", va="bottom")
 
     if legend_handles:
         ax.legend(handles=legend_handles, loc="lower right", fontsize=7.5,
@@ -93,7 +93,7 @@ def plot_functional_layer(FC, pos, node_colors, save_path, region_names=None,
     G = _thresholded_graph(FC, thr_percentile)
 
     fig, ax = plt.subplots(figsize=(6.5, 5.8))
-    ax.set_title(title, fontsize=10, color=edge_color, pad=8)
+    ax.set_title(title, fontsize=10, pad=8)
     ax.set_aspect("equal"); ax.axis("off")
 
     for u, v, d in G.edges(data=True):
@@ -118,7 +118,7 @@ def plot_functional_layer(FC, pos, node_colors, save_path, region_names=None,
             top3 = np.argsort(fc_str)[::-1][:3]
             hub_txt = "Hubs: " + ", ".join(f"{region_names[i]}({fc_str[i]:.2f})" for i in top3)
             ax.text(0.02, 0.02, hub_txt, transform=ax.transAxes,
-                    fontsize=7.5, color=P["GRAY"], va="bottom")
+                    fontsize=7.5, color="black", va="bottom")
 
     if legend_handles:
         ax.legend(handles=legend_handles, loc="lower right", fontsize=7.5,
@@ -180,8 +180,8 @@ def plot_glass_brain(shift_vals, FC, save_path, networks, top_pct=20, display_mo
         edge_kwargs={"linewidth": 0.6}, display_mode=display_mode, axes=ax,
         black_bg=False, alpha=0.12, colorbar=True, annotate=True, title="",
     )
-    fig.suptitle(f"Node size ∝ Shift   |   Edges = FC (top-{top_pct}% nodes)",
-                 fontsize=11, fontweight="bold", color=P["NAVY"], y=1.02)
+    fig.suptitle(f"Node size ∝ Shift   |   Edges = FC (top {top_pct}% nodes)",
+                 fontsize=11, fontweight="bold", y=1.02)
 
     net_handles = atlas_mod.legend_handles(networks)
     size_levels = [0.0, 0.5, 1.0]

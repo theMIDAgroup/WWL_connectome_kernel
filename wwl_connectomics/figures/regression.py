@@ -27,9 +27,9 @@ def plot_regression_scatter(y_true, y_pred, save_path, label="target", r2=None, 
     title = f"{label}: predicted (CV) vs true"
     if subtitle:
         title += "  (" + ", ".join(subtitle) + ")"
-    ax.set_title(title, fontsize=10.5, color=P["NAVY"], fontweight="bold")
-    ax.set_xlabel(f"{label} (true)", color=P["GRAY"])
-    ax.set_ylabel(f"{label} (predicted, out-of-fold)", color=P["GRAY"])
+    ax.set_title(title, fontsize=10.5, fontweight="bold")
+    ax.set_xlabel(f"{label} (true)")
+    ax.set_ylabel(f"{label} (predicted, out-of-fold)")
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(alpha=0.25)
@@ -56,9 +56,9 @@ def plot_scatter_regression(x, y, save_path, xlabel="x", ylabel="y", title=None)
     xs = np.linspace(x.min(), x.max(), 100)
     ax.plot(xs, res.intercept + res.slope * xs, color=P["CORAL"], lw=2, zorder=4,
             label=f"OLS: r={res.rvalue:.3f}, p={res.pvalue:.2e}")
-    ax.set_xlabel(xlabel, color=P["GRAY"])
-    ax.set_ylabel(ylabel, color=P["GRAY"])
-    ax.set_title(title or f"{ylabel} vs {xlabel}", fontsize=10.5, color=P["NAVY"], fontweight="bold")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title or f"{ylabel} vs {xlabel}", fontsize=10.5, fontweight="bold")
     ax.legend(fontsize=8.5, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(alpha=0.25)
@@ -98,7 +98,7 @@ def plot_regions_scatter_grid(shift, y, region_names, save_path, top_n=12,
         xs = np.linspace(xr.min(), xr.max(), 50)
         ax.plot(xs, res.intercept + res.slope * xs, color=P["CORAL"], lw=1.6, zorder=4)
         name = str(region_names[r]).replace("7Networks_", "").replace("_", " ")
-        ax.set_title(f"{name}\nr={res.rvalue:.2f}, p={res.pvalue:.1e}", fontsize=8.5, color=P["NAVY"])
+        ax.set_title(f"{name}\nr={res.rvalue:.2f}, p={res.pvalue:.1e}", fontsize=8.5)
         ax.tick_params(labelsize=7)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(alpha=0.2)
@@ -106,7 +106,7 @@ def plot_regions_scatter_grid(shift, y, region_names, save_path, top_n=12,
         ax.axis("off")
 
     fig.suptitle(f"Top {len(top_idx)} regions by |r|, shift vs {target_label}",
-                 fontsize=12, color=P["NAVY"], fontweight="bold", y=1.02)
+                 fontsize=12, fontweight="bold", y=1.02)
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])
     plt.close(fig)
@@ -129,8 +129,8 @@ def plot_region_importance_bar(coefs, region_names, save_path, top_n=20,
     ax.barh(y_pos, top_vals, color=colors_bar, alpha=0.82, edgecolor=P["WHITE"], linewidth=0.5)
     ax.axvline(0, color=P["NAVY"], lw=0.8)
     ax.set_yticks(y_pos); ax.set_yticklabels(top_names, fontsize=8)
-    ax.set_xlabel(xlabel, color=P["GRAY"])
-    ax.set_title(title, fontsize=10, color=P["NAVY"])
+    ax.set_xlabel(xlabel)
+    ax.set_title(title, fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
         Patch(facecolor=P["CORAL"], label="Higher shift -> higher target"),

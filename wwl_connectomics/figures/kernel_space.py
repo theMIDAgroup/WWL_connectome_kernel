@@ -40,7 +40,7 @@ def plot_kernel_matrix(K, save_path, sample_labels=None, group_sizes=None, annot
     vmin, vmax = (off_diag.min(), off_diag.max()) if off_diag.size else (0, 1)
     im = ax.imshow(K, cmap=cmap, vmin=vmin, vmax=vmax, aspect="auto")
     plt.colorbar(im, ax=ax, label="kernel similarity", shrink=0.85)
-    ax.set_title("Kernel matrix", fontsize=11, color=P["NAVY"], pad=10)
+    ax.set_title("Kernel matrix", fontsize=11, pad=10)
 
     if S <= max_labelled_samples:
         ticks = list(range(S))
@@ -59,8 +59,8 @@ def plot_kernel_matrix(K, save_path, sample_labels=None, group_sizes=None, annot
                             fontsize=6, color=P["WHITE"] if K[i, j] > mid else P["NAVY"])
     else:
         ax.set_xticks([]); ax.set_yticks([])
-        ax.set_xlabel(f"{S} subjects", color=P["GRAY"], fontsize=9)
-        ax.set_ylabel(f"{S} subjects", color=P["GRAY"], fontsize=9)
+        ax.set_xlabel(f"{S} subjects", fontsize=9)
+        ax.set_ylabel(f"{S} subjects", fontsize=9)
 
     if group_sizes:
         bounds = np.cumsum([0] + list(group_sizes.values()))
@@ -93,17 +93,17 @@ def plot_kernel_pca(Z, group_labels, save_path, group_colors=None, sample_names=
 
     fig, ax = plt.subplots(figsize=(7, 6))
     ax.set_title("Kernel PCA embedding space\n(color = group)",
-                  fontsize=11, color=P["NAVY"], pad=8)
+                  fontsize=11, pad=8)
     for i in range(S):
         ax.scatter(Z[i, 0], Z[i, 1], c=[group_colors[group_labels[i]]], s=200,
                    edgecolors=P["NAVY"], linewidths=1.2, zorder=3)
         label = sample_names[i] if sample_names is not None else f"S{i+1}"
         ax.annotate(label, xy=Z[i], xytext=(5, 5),
-                    textcoords="offset points", fontsize=8, color=P["NAVY"])
+                    textcoords="offset points", fontsize=8, color="black")
     ax.legend(handles=[Patch(facecolor=group_colors[c], label=str(c)) for c in cats],
               fontsize=9, framealpha=0.9, edgecolor=P["LGRAY"], loc="best")
-    ax.set_xlabel("kPC1", color=P["GRAY"])
-    ax.set_ylabel("kPC2", color=P["GRAY"])
+    ax.set_xlabel("kPC1")
+    ax.set_ylabel("kPC2")
     ax.grid(True, alpha=0.35)
     ax.spines[["top", "right"]].set_visible(False)
     ax.axhline(0, color=P["LGRAY"], linewidth=0.8)
@@ -178,7 +178,7 @@ def plot_lambda_sensitivity(lam_grid, accs, save_path, lam_mu=None, lam_fisher=N
     ax.fill_between(lam_grid, accs, 0.5, where=accs > 0.5, alpha=0.12, color=P["TEAL"])
     ax.set_xlabel("λ (log scale)", fontsize=9)
     ax.set_ylabel("Bal. accuracy (CV)", fontsize=9)
-    ax.set_title("λ sensitivity", fontsize=10, color=P["NAVY"])
+    ax.set_title("λ sensitivity", fontsize=10)
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(True, alpha=0.22)

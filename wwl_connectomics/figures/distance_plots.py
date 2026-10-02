@@ -28,7 +28,7 @@ def plot_distance_heatmap(D, save_path, group_sizes=None, title="Distance matrix
     vmin, vmax = (off_diag.min(), off_diag.max()) if off_diag.size else (None, None)
     im = ax.imshow(D, cmap=cmap, aspect="auto", vmin=vmin, vmax=vmax)
     plt.colorbar(im, ax=ax, shrink=0.85, label="distance")
-    ax.set_title(title, fontsize=10, color=P["NAVY"])
+    ax.set_title(title, fontsize=10)
     ax.set_xlabel("Subject"); ax.set_ylabel("Subject")
 
     if group_sizes:
@@ -58,7 +58,7 @@ def plot_distance_boxplot_by_group(distance_groups, save_path, colors=None, ylab
     for patch, n in zip(bp["boxes"], names):
         patch.set_facecolor(colors[n]); patch.set_alpha(0.6)
     ax.set_ylabel(ylabel)
-    ax.set_title("Distance distributions by group", fontsize=10, color=P["NAVY"])
+    ax.set_title("Distance distributions by group", fontsize=10)
     ax.grid(True, alpha=0.25)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
@@ -92,7 +92,7 @@ def plot_distance_intra_inter_hist(distance_groups, save_path, colors=None,
         _, p_mw = mannwhitneyu(distance_groups[a], distance_groups[b], alternative=alternative)
         stars = "***" if p_mw < 0.001 else "**" if p_mw < 0.01 else "*" if p_mw < 0.05 else "n.s."
         title += f"  |  {a} {alternative} {b}: {stars} (p={p_mw:.3f})"
-    ax.set_title(title, fontsize=10, color=P["NAVY"])
+    ax.set_title(title, fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(True, alpha=0.22)
     fig.tight_layout()
@@ -127,8 +127,8 @@ def plot_distance_stats_table(distance_groups, save_path, mw_pair=None, alternat
             x_pos = sum(col_widths[:ci]) + 0.02
             weight = "bold" if ri == 0 or ci == 0 else "normal"
             ax.text(x_pos, 1 - ri * 0.14, cell, transform=ax.transAxes,
-                    fontsize=9.5, fontweight=weight, color=P["NAVY"], va="top")
-    ax.set_title("Distance statistics", fontsize=10, color=P["NAVY"])
+                    fontsize=9.5, fontweight=weight, color="black", va="top")
+    ax.set_title("Distance statistics", fontsize=10)
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])
     plt.close(fig)

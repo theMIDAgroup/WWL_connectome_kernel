@@ -63,7 +63,7 @@ def plot_embedding_shift_2d(emb, region_names, save_path, subject_label=None, h_
     title = "Node embedding shift"
     if subject_label: title += f", {subject_label}"
     if h_iter is not None: title += f"  (iter 0 to iter {h_iter})"
-    fig.suptitle(title, fontsize=12, fontweight="bold", color=P["NAVY"])
+    fig.suptitle(title, fontsize=12, fontweight="bold")
 
     ax.scatter(X0_2d[:, 0], X0_2d[:, 1], c=col0, s=200, marker="o",
                edgecolors=P["NAVY"], linewidths=1.2, label="iter 0 (raw FC)", zorder=3, alpha=0.9)
@@ -77,22 +77,22 @@ def plot_embedding_shift_2d(emb, region_names, save_path, subject_label=None, h_
                     arrowprops=dict(arrowstyle="->", color=P["GRAY"], lw=0.9, alpha=0.5,
                                      connectionstyle="arc3,rad=0.18"))
         ax.annotate(region_names[i], xy=X0_2d[i], xytext=(5, 5),
-                    textcoords="offset points", fontsize=8, color=P["NAVY"], alpha=0.8)
+                    textcoords="offset points", fontsize=8, color="black", alpha=0.8)
 
     for i in order[:2]:
         ax.annotate(f"Δ={shift_l2[i]:.3f}", xy=XH_2d[i], xytext=(8, -14),
                     textcoords="offset points", fontsize=7.5, color=P["AMBER"],
                     arrowprops=dict(arrowstyle="-", color=P["AMBER"], lw=0.6))
 
-    ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)", color=P["GRAY"])
-    ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)", color=P["GRAY"])
+    ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)")
+    ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)")
     ax.legend(fontsize=8.5, framealpha=0.9, edgecolor=P["LGRAY"], loc="best")
     ax.grid(True, alpha=0.35)
     ax.spines[["top", "right"]].set_visible(False)
 
     summary = "  ".join(f"{region_names[i]}: {shift_l2[i]:.3f}" for i in order)
     ax.text(0.01, -0.06, f"L2 shift: {summary}", transform=ax.transAxes,
-            fontsize=7, color=P["GRAY"], va="top")
+            fontsize=7, color="black", va="top")
 
     fig.tight_layout(pad=2.0, rect=[0, 0.04, 1, 1])
     fig.savefig(save_path, dpi=150, bbox_inches="tight", facecolor=P["WHITE"])
@@ -121,7 +121,7 @@ def plot_shift_comparison_subject(emb, shift, region_names, networks, net_colors
     fig, ax = plt.subplots(figsize=(7, 6))
     title = "Node embedding shift"
     if h_iter is not None: title += f"  (iter 0 → iter {h_iter})"
-    fig.suptitle(title, fontsize=10, color=P["NAVY"])
+    fig.suptitle(title, fontsize=10)
 
     ax.scatter(X0[:, 0], X0[:, 1], c=net_colors, s=40, marker="o",
                edgecolors="white", linewidths=0.5, alpha=0.5, zorder=2)
@@ -143,8 +143,8 @@ def plot_shift_comparison_subject(emb, shift, region_names, networks, net_colors
     ax.set_title(f"{label}  mean δ={shift.mean():.3f}  max δ={shift.max():.3f}",
                  fontsize=10, color=color)
     ev = pca.explained_variance_ratio_
-    ax.set_xlabel(f"PC1 ({ev[0]*100:.1f}%)", color=P["GRAY"])
-    ax.set_ylabel(f"PC2 ({ev[1]*100:.1f}%)", color=P["GRAY"])
+    ax.set_xlabel(f"PC1 ({ev[0]*100:.1f}%)")
+    ax.set_ylabel(f"PC2 ({ev[1]*100:.1f}%)")
     ax.grid(True, alpha=0.3); ax.spines[["top", "right"]].set_visible(False)
 
     iter_legend = ax.legend(handles=[
@@ -169,7 +169,7 @@ def plot_shift_distribution_by_network(shift_A, shift_B, networks, save_path, la
     net_names = list(networks.keys())
     nn = len(net_names)
     fig, ax = plt.subplots(figsize=(8, 6))
-    fig.suptitle("Embedding shift  $\\delta(r_i)=\\|a^H(r_i)-a^0(r_i)\\|_2$", fontsize=11, color=P["NAVY"])
+    fig.suptitle("Embedding shift  $\\delta(r_i)=\\|a^H(r_i)-a^0(r_i)\\|_2$", fontsize=11)
 
     rng_j = np.random.RandomState(0)
     for ni, (net, (idxs, col)) in enumerate(networks.items()):
@@ -186,8 +186,8 @@ def plot_shift_distribution_by_network(shift_A, shift_B, networks, save_path, la
 
     ax.set_yticks(range(nn))
     ax.set_yticklabels([f"{n}  ({len(list(networks[n][0]))} ROIs)" for n in net_names], fontsize=9)
-    ax.set_xlabel("Embedding shift  $\\delta(r_i)$", color=P["GRAY"])
-    ax.set_title("Distribution per network", fontsize=10, color=P["NAVY"])
+    ax.set_xlabel("Embedding shift  $\\delta(r_i)$")
+    ax.set_title("Distribution per network", fontsize=10)
     ax.grid(axis="x", alpha=0.35); ax.spines[["top", "right"]].set_visible(False)
     ax.invert_yaxis()
     ax.legend(handles=[
@@ -223,7 +223,7 @@ def plot_mean_shift_heatmap(shift_A, shift_B, networks, save_path, label_A="A", 
     plt.colorbar(im, ax=ax, label="mean $\\delta$", shrink=0.85)
     ax.set_xticks([0, 1]); ax.set_xticklabels([f"Subj. {label_A}", f"Subj. {label_B}"], fontsize=9)
     ax.set_yticks(range(nn)); ax.set_yticklabels(net_names, fontsize=9)
-    ax.set_title("Mean shift per network", fontsize=10, color=P["NAVY"])
+    ax.set_title("Mean shift per network", fontsize=10)
     for ni in range(nn):
         diff = abs(mean_A[ni] - mean_B[ni])
         star = "*" if diff > 0.5 * pooled[ni] else ""
@@ -255,11 +255,11 @@ def plot_top_regions_shift(delta, significant, region_names, save_path,
     for yi, (d, s) in enumerate(zip(top_delta, top_sig)):
         if s:
             ax.text(d + np.sign(d) * 0.02 * np.abs(delta).max(), y_pos[yi], "*",
-                    ha="center", va="center", fontsize=11, color=P["NAVY"], fontweight="bold")
+                    ha="center", va="center", fontsize=11, color="black", fontweight="bold")
     ax.axvline(0, color=P["NAVY"], lw=0.8)
     ax.set_yticks(y_pos); ax.set_yticklabels(top_names, fontsize=8)
-    ax.set_xlabel(f"Δ mean shift ({label_1} − {label_0})", color=P["GRAY"])
-    ax.set_title(f"Top-{top_n} regions by |Δ shift|  (* FDR p<0.05)", fontsize=10, color=P["NAVY"])
+    ax.set_xlabel(f"Δ mean shift ({label_1} − {label_0})")
+    ax.set_title(f"Top {top_n} regions by |Δ shift|  (* FDR p<0.05)", fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
         Patch(facecolor=P["CORAL"], label=f"Higher shift in {label_1}"),
@@ -286,7 +286,7 @@ def plot_shift_boxplot_by_network(shifts_0, shifts_1, rsn_ids, rsn_labels, save_
         draw_violin(ax, d1, xi + width / 2, width * 0.9, P["CORAL"], "darkred")
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("Mean shift per RSN (subjects)")
-    ax.set_title(f"Shift per RSN: {label_0} vs {label_1}", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"Shift per RSN: {label_0} vs {label_1}", fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
         Patch(facecolor=P["BLUE"], alpha=0.65, label=label_0),
@@ -312,10 +312,10 @@ def plot_shift_scatter_groups(mu_0, mu_1, delta, region_names, node_colors, save
     top_idx = np.argsort(delta)[::-1][:top_n]
     for ri in top_idx:
         ax.annotate(str(region_names[ri]).split("_")[-1], (mu_0[ri], mu_1[ri]),
-                    fontsize=6.5, color=P["NAVY"], xytext=(4, 4), textcoords="offset points")
-    ax.set_xlabel(f"Mean shift {label_0}", color=P["GRAY"])
-    ax.set_ylabel(f"Mean shift {label_1}", color=P["GRAY"])
-    ax.set_title(f"Region scatter (above diagonal = more shift in {label_1})", fontsize=9, color=P["NAVY"])
+                    fontsize=6.5, color="black", xytext=(4, 4), textcoords="offset points")
+    ax.set_xlabel(f"Mean shift {label_0}")
+    ax.set_ylabel(f"Mean shift {label_1}")
+    ax.set_title(f"Region scatter (above diagonal = more shift in {label_1})", fontsize=9)
     ax.legend(fontsize=8, framealpha=0.85)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(alpha=0.25)
@@ -339,10 +339,10 @@ def plot_significant_fraction_by_network(significant, rsn_ids, rsn_labels, save_
     ax.bar(np.arange(n_rsn), frac_sig * 100, color=(rsn_cols * ((n_rsn // 7) + 1))[:n_rsn],
            alpha=0.82, edgecolor=P["WHITE"], linewidth=0.5)
     for xi, (f, s, t) in enumerate(zip(frac_sig, sig_per_rsn, total_per_rsn)):
-        ax.text(xi, f * 100 + 1, f"{s}/{t}", ha="center", fontsize=8, color=P["NAVY"])
+        ax.text(xi, f * 100 + 1, f"{s}/{t}", ha="center", fontsize=8, color="black")
     ax.set_xticks(np.arange(n_rsn)); ax.set_xticklabels(rsn_labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("% significant regions (FDR p<0.05)")
-    ax.set_title(f"Fraction sig. regions per RSN  ({label_1} > {label_0})", fontsize=10, color=P["NAVY"])
+    ax.set_title(f"Fraction sig. regions per RSN  ({label_1} > {label_0})", fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
     ax.set_ylim(0, 110)
     ax.grid(axis="y", alpha=0.3)

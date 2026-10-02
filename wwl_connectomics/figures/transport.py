@@ -29,13 +29,13 @@ def plot_transport_plan(P_star, networks, save_path, net_names=None):
 
     cmap = LinearSegmentedColormap.from_list("tr", ["white", "#B5D4F4", "#185FA5", "#0D1B3E"])
     fig, ax = plt.subplots(figsize=(6.5, 5.5))
-    fig.suptitle("Optimal transport plan  $P^*$", fontsize=11, color=P["NAVY"])
+    fig.suptitle("Optimal transport plan  $P^*$", fontsize=11)
     nn = len(net_names)
     im = ax.imshow(P_norm, cmap=cmap, aspect="auto", vmin=0, vmax=P_norm.max())
     plt.colorbar(im, ax=ax, label="fraction of mass", shrink=0.85)
     ax.set_xticks(range(nn)); ax.set_xticklabels(net_names, rotation=45, ha="right", fontsize=9)
     ax.set_yticks(range(nn)); ax.set_yticklabels(net_names, fontsize=9)
-    ax.set_xlabel("Subject B", color=P["GRAY"]); ax.set_ylabel("Subject A", color=P["GRAY"])
+    ax.set_xlabel("Subject B"); ax.set_ylabel("Subject A")
     th = P_norm.max() * 0.55
     for i in range(nn):
         for j in range(nn):
@@ -57,13 +57,13 @@ def plot_ground_distance(M_dist, networks, save_path, net_names=None):
 
     cmap = LinearSegmentedColormap.from_list("ds", ["white", "#F5C4B3", "#D85A30", "#7A2810"])
     fig, ax = plt.subplots(figsize=(6.5, 5.5))
-    fig.suptitle("Ground distance $M$ (mean Euclidean)", fontsize=11, color=P["NAVY"])
+    fig.suptitle("Ground distance $M$ (mean Euclidean)", fontsize=11)
     nn = len(net_names)
     im = ax.imshow(M_net, cmap=cmap, aspect="auto", vmin=0, vmax=M_net.max())
     plt.colorbar(im, ax=ax, label="mean distance", shrink=0.85)
     ax.set_xticks(range(nn)); ax.set_xticklabels(net_names, rotation=45, ha="right", fontsize=9)
     ax.set_yticks(range(nn)); ax.set_yticklabels(net_names, fontsize=9)
-    ax.set_xlabel("Subject B", color=P["GRAY"]); ax.set_ylabel("Subject A", color=P["GRAY"])
+    ax.set_xlabel("Subject B"); ax.set_ylabel("Subject A")
     th = M_net.max() * 0.55
     for i in range(nn):
         for j in range(nn):
